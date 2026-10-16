@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "model": "models/figure-stand.3mf",
+  "title": "人形立て",
+  "description": "Fusionで作成した人形立ての3Dモデルです。ドラッグやピンチで、形状を自由に確認できます。",
+  "updatedAt": "2026-10-17",
+  "upAxis": "Z",
+  "frontAxis": "X",
+  "colors": {}
+}
