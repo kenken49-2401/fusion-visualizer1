@@ -4,6 +4,9 @@ test('phone portrait and landscape stay within the viewport with operable contro
   await page.goto('/');
   await expect(page.locator('#viewport')).toHaveAttribute('data-ready', 'true');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  const viewport = (await page.locator('#viewport').boundingBox())!;
+  const toolbar = (await page.locator('.view-controls').boundingBox())!;
+  expect(viewport.y + viewport.height).toBeLessThanOrEqual(toolbar.y);
   await page.getByRole('button', { name: '上面', exact: true }).tap();
   await expect(page.locator('[data-view="top"]')).toHaveAttribute('aria-pressed', 'true');
   const control = (await page.locator('[data-view="top"]').boundingBox())!;

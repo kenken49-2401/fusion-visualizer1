@@ -59,7 +59,7 @@ npm run dev:admin
 
 ## GitHub Pages への公開
 
-`.github/workflows/pages.yml` は `main` への push と手動実行に対応します。依存関係の固定インストール、ユニットテスト、ビルドを行い、成果物を Pages に配信します。プロジェクトサイトのパスは Pages の設定から `BASE_PATH` に渡します。
+`.github/workflows/pages.yml` は `main` への push と手動実行に対応します。依存関係の固定インストール、ユニットテスト、ビルドを行い、成果物を Pages に配信します。プロジェクトサイトのパス `/<リポジトリ名>/` を `BASE_PATH` に渡します。カスタムドメインを使う場合は `/` に変更してください。初回の公開権限が不足していても build ジョブはテストと成果物のアップロードまで実行します。
 
 初回はリポジトリの **Settings → Pages → Build and deployment → Source** が **GitHub Actions** であることを確認してください。ワークフローは Pages の自動有効化も試みますが、組織の方針や権限によって手動設定が必要です。公開先 URL は成功した Actions の `github-pages` デプロイ結果で確認できます。
 
