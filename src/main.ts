@@ -1,9 +1,11 @@
 import { Box3 } from 'three';
 import { mountShell } from './shell';
-import { fetchConfig } from './config';
+import { fetchCatalog, fetchConfig } from './config';
 import { loadModel } from './model-loader';
 import { Appearance } from './appearance';
 import { ModelScene, type View } from './scene';
+import { mountDrawings } from './drawings';
+import { mountMeasurements } from './measurements';
 import './style.css';
 
 mountShell(document.querySelector<HTMLElement>('#app')!);
@@ -36,7 +38,12 @@ function toast(text: string): void {
 }
 
 el<HTMLButtonElement>('share').onclick = async () => {
-  const url = new URL(import.meta.env.BASE_URL, location.origin).href;
+  const shared = import.meta.env.DEV && __LOCAL_ADMIN__
+    ? new URL('https://kenken49-2401.github.io/fusion-visualizer1/')
+    : new URL(import.meta.env.BASE_URL, location.origin);
+  const selected = el<HTMLSelectElement>('model-select').value;
+  if (selected) shared.searchParams.set('model', selected);
+  const url = shared.href;
   try {
     if (navigator.share && /iPhone|iPad|Android/.test(navigator.userAgent)) await navigator.share({ title: document.title, url });
     else { await navigator.clipboard.writeText(url); toast('共有リンクをコピーしました'); }
@@ -51,7 +58,18 @@ el<HTMLButtonElement>('share').onclick = async () => {
 };
 
 async function start(): Promise<void> {
-  const config = await fetchConfig();
+  const catalog = await fetchCatalog();
+  const requested = new URLSearchParams(location.search).get('model');
+  const entry = catalog.find(model => model.id === requested) ?? catalog[0];
+  const selector = el<HTMLSelectElement>('model-select');
+  selector.replaceChildren(...catalog.map(model => new Option(model.title, model.id)));
+  selector.value = entry.id; selector.disabled = false;
+  selector.onchange = () => {
+    const url = new URL(location.href); url.searchParams.set('model', selector.value);
+    location.assign(url.href);
+  };
+  if (requested && requested !== entry.id) toast('指定のモデルが見つからないため、最初のモデルを表示します。');
+  const config = await fetchConfig(entry.config);
   el('model-name').textContent = config.title;
   document.title = `${config.title} — Fusion Visualizer`;
   el('viewport').setAttribute('aria-label', `${config.title}の3Dモデル。ドラッグで回転、ピンチで拡大縮小。`);
@@ -76,12 +94,15 @@ async function start(): Promise<void> {
     const visible = loaded.bodies.filter(body => body.object.visible).length;
     el('status').textContent = `${visible} / ${loaded.bodies.length} ボディ表示 · ${loaded.triangles.toLocaleString('ja-JP')} ポリゴン`;
   };
-  for (const body of loaded.bodies) {
+  const duplicateNames = new Map<string, number>();
+  loaded.bodies.forEach(body => duplicateNames.set(body.name, (duplicateNames.get(body.name) || 0) + 1));
+  for (const [index, body] of loaded.bodies.entries()) {
     const row = document.createElement('li'); row.className = 'body-row'; row.dataset.bodyId = body.id;
     const swatch = document.createElement('span'); swatch.className = 'body-swatch'; swatch.style.backgroundColor = appearance.swatch(body); swatches.set(body.id, swatch);
-    const name = document.createElement('span'); name.className = 'body-name'; name.textContent = body.name; name.title = body.name;
-    const focus = document.createElement('button'); focus.type = 'button'; focus.className = 'body-focus'; focus.textContent = '⌖'; focus.setAttribute('aria-label', `${body.name}に注目`);
-    const toggle = document.createElement('button'); toggle.type = 'button'; toggle.className = 'body-toggle'; toggle.setAttribute('aria-pressed', 'true'); toggle.setAttribute('aria-label', `${body.name}を表示`);
+    const displayName = duplicateNames.get(body.name)! > 1 ? `${body.name} · ${String(index + 1).padStart(2, '0')}` : body.name;
+    const name = document.createElement('span'); name.className = 'body-name'; name.textContent = displayName; name.title = `${displayName} (${body.id})`;
+    const focus = document.createElement('button'); focus.type = 'button'; focus.className = 'body-focus'; focus.textContent = '⌖'; focus.setAttribute('aria-label', `${displayName}に注目`);
+    const toggle = document.createElement('button'); toggle.type = 'button'; toggle.className = 'body-toggle'; toggle.setAttribute('aria-pressed', 'true'); toggle.setAttribute('aria-label', `${displayName}を表示`);
     toggle.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
     toggle.onclick = () => {
       body.object.visible = !body.object.visible;
@@ -101,15 +122,36 @@ async function start(): Promise<void> {
   el('loading').hidden = true; setStatus();
   el('viewport').dataset.ready = 'true';
   el('viewport').dataset.triangles = String(loaded.triangles);
+  el('viewport').dataset.modelId = entry.id;
+  const closeDrawings = mountDrawings({ model: loaded, title: config.title, trigger: el<HTMLButtonElement>('open-drawings') });
+  el<HTMLButtonElement>('open-drawings').disabled = false;
+  const measurements = mountMeasurements({ scene, model: loaded, modelKey: `${entry.id}:${loaded.fingerprint}:${config.upAxis}:${config.frontAxis}`, panel: el('measurement-panel') });
+  const measurementToggle = el('measurement-panel').querySelector<HTMLButtonElement>('.measurement-toggle')!;
+  const shortcut = el<HTMLButtonElement>('measurement-shortcut');
+  shortcut.disabled = false;
+  shortcut.onclick = () => measurementToggle.click();
+  measurementToggle.addEventListener('click', () => {
+    const active = measurementToggle.getAttribute('aria-pressed') === 'true';
+    shortcut.setAttribute('aria-pressed', String(active));
+    shortcut.textContent = active ? '計測を終了' : '2点間を測る';
+    if (active) el('viewport').scrollIntoView({ block: 'center', behavior: 'smooth' });
+  });
+  el<HTMLButtonElement>('drawing-shortcut').disabled = false;
+  el<HTMLButtonElement>('drawing-shortcut').onclick = () => el<HTMLButtonElement>('open-drawings').click();
   // The editor and its save API exist only on the loopback development server in explicit admin mode.
   if (import.meta.env.DEV && __LOCAL_ADMIN__) {
     const { mountEditor } = await import('./admin');
-    mountEditor({ config, bodies: loaded.bodies, appearance, invalidate: () => {
+    mountEditor({ modelId: entry.id, config, bodies: loaded.bodies, appearance,
+    focusBody: body => {
+      if (!body.object.visible) el('body-list').querySelector<HTMLButtonElement>(`[data-body-id="${body.id}"] .body-toggle`)?.click();
+      activeView(); scene.focus(new Box3().setFromObject(body.object));
+      el('viewport').scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }, invalidate: () => {
       for (const body of loaded.bodies) swatches.get(body.id)!.style.backgroundColor = appearance.swatch(body);
       scene.requestRender();
     }, notify: toast });
   }
-  window.addEventListener('pagehide', event => { if (!event.persisted) scene.dispose(); });
+  window.addEventListener('pagehide', event => { if (!event.persisted) { closeDrawings(); measurements.dispose(); scene.dispose(); } });
 }
 
 start().catch(error => {

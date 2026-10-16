@@ -38,8 +38,32 @@ export function parseConfig(value: unknown): ViewerConfig {
   return { ...c, colors: validateColors(c.colors) } as ViewerConfig;
 }
 
-export async function fetchConfig(): Promise<ViewerConfig> {
-  const response = await fetch(`${import.meta.env.BASE_URL}viewer.json`, { cache: 'no-cache' });
+export interface ModelEntry { id: string; title: string; config: string }
+
+export function parseCatalog(value: unknown): ModelEntry[] {
+  if (!value || typeof value !== 'object') throw new Error('モデル一覧を読み取れません。');
+  const catalog = value as { schemaVersion?: unknown; models?: unknown };
+  if (catalog.schemaVersion !== 1 || !Array.isArray(catalog.models) || catalog.models.length === 0 || catalog.models.length > 100) throw new Error('モデル一覧の形式が不正です。');
+  const ids = new Set<string>();
+  return catalog.models.map((raw: unknown) => {
+    if (!raw || typeof raw !== 'object') throw new Error('モデルの項目が不正です。');
+    const entry = raw as ModelEntry;
+    if (typeof entry.id !== 'string' || !/^[a-z0-9-]{1,80}$/.test(entry.id) || ids.has(entry.id)) throw new Error('モデルの識別子が不正です。');
+    if (typeof entry.title !== 'string' || !entry.title.trim() || entry.title.length > 160) throw new Error('モデル名が不正です。');
+    if (typeof entry.config !== 'string' || !/^(viewer\.json|models\/[a-z0-9-]+\.json)$/.test(entry.config)) throw new Error('モデルの設定パスが不正です。');
+    ids.add(entry.id);
+    return { id: entry.id, title: entry.title, config: entry.config };
+  });
+}
+
+export async function fetchCatalog(): Promise<ModelEntry[]> {
+  const response = await fetch(`${import.meta.env.BASE_URL}catalog.json`, { cache: 'no-cache' });
+  if (!response.ok) throw new Error(`モデル一覧を取得できませんでした（${response.status}）。`);
+  return parseCatalog(await response.json());
+}
+
+export async function fetchConfig(path = 'viewer.json'): Promise<ViewerConfig> {
+  const response = await fetch(`${import.meta.env.BASE_URL}${path}`, { cache: 'no-cache' });
   if (!response.ok) throw new Error(`表示設定を取得できませんでした（${response.status}）。`);
   return parseConfig(await response.json());
 }

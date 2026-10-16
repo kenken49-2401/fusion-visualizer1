@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "model": "models/signage.3mf",
+  "title": "サイネージ",
+  "description": "サイネージの構造モデル。各ボディの表示、寸法付き図面、距離測定で細部を確認できます。",
+  "updatedAt": "2026-10-17",
+  "upAxis": "Z",
+  "frontAxis": "Y",
+  "colors": {}
+}

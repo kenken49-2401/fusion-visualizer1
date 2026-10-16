@@ -44,11 +44,14 @@ test('public build contains no editor code or save endpoint', async ({ page, req
   await expect(page.getByRole('button', { name: /開発者/ })).toHaveCount(0);
   const scripts = readdirSync('dist/assets').filter(name => name.endsWith('.js')).map(name => readFileSync(`dist/assets/${name}`, 'utf8')).join('\n');
   expect(scripts).not.toContain('/__admin/colors');
+  expect(scripts).not.toContain('/__admin/sync');
+  expect(scripts).not.toContain('GitHubへ同期');
   expect(scripts).not.toContain('LOCAL ADMIN');
   expect(scripts).not.toContain('未保存の変更');
   const response = await request.post('/__admin/colors', { data: { colors: {} } });
   expect(response.status()).toBeGreaterThanOrEqual(400);
   expect(response.headers()['content-type'] || '').not.toContain('application/json');
+  expect((await request.post('/__admin/sync', { data: {} })).status()).toBeGreaterThanOrEqual(400);
 });
 
 test('model network failures produce a readable retry state', async ({ page }) => {

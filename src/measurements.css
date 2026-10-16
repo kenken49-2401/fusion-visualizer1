@@ -1,0 +1,17 @@
+.measurement-heading { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
+.measurement-heading h2 { margin: 0; font-size: 1rem; }
+.measurement-help, .measurement-storage { color: var(--muted, #637063); font-size: .78rem; line-height: 1.6; }
+.measurement-snap { display: flex; align-items: center; gap: .4rem; font-size: .84rem; }
+.measurement-status { font-size: .8rem; min-height: 1.5em; }
+.measurement-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
+.measurement-list { padding: 0; margin: .8rem 0 0; list-style: none; max-height: 15rem; overflow: auto; }
+.measurement-list li { display: flex; align-items: center; justify-content: space-between; gap: .4rem; padding: .55rem 0; border-bottom: 1px solid #d8dfd4; font-size: .85rem; font-variant-numeric: tabular-nums; }
+.measurement-list small { display: block; font-size: .7rem; color: #637063; margin-top: .2rem; }
+.measurement-overlay { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 4; }
+.measurement-label { position: absolute; top: 0; left: 0; display: block; white-space: nowrap; background: #fffaf0f5; border: 1px solid #b66330; border-radius: 5px; box-shadow: 0 2px 8px #26362220; color: #704122; padding: .22rem .4rem; font-size: .72rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.measurement-label[hidden] { display: none; }
+.measurement-label.is-pending { border-style: dashed; }
+canvas.is-measuring { cursor: crosshair; }
+#measurement-panel button { min-height: 32px; }
+#measurement-panel button:disabled { opacity: .45; cursor: default; }
+@media (pointer: coarse) { #measurement-panel button { min-height: 40px; } }

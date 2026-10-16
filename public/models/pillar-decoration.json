@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "model": "models/pillar-decoration.3mf",
+  "title": "柱装飾",
+  "description": "4つのボディで構成された柱装飾。モデルを切り替えて、形状・部品寸法・2点間の距離を確認できます。",
+  "updatedAt": "2026-10-17",
+  "upAxis": "Z",
+  "frontAxis": "Y",
+  "colors": {}
+}

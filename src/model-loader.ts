@@ -23,6 +23,7 @@ export interface LoadedModel {
   sizeMM: Vector3;
   bounds: Box3;
   triangles: number;
+  fingerprint?: string;
 }
 
 const children = (node: Element, name: string) => Array.from(node.children).filter(n => n.localName === name);
@@ -109,7 +110,17 @@ export function parseModel(data: ArrayBuffer, config: Pick<ViewerConfig, 'upAxis
 }
 
 export async function loadModel(config: ViewerConfig): Promise<LoadedModel> {
-  const response = await fetch(`${import.meta.env.BASE_URL}${config.model}`);
+  const response = await fetch(`${import.meta.env.BASE_URL}${config.model}`, { cache: 'no-cache' });
   if (!response.ok) throw new Error(`3Dモデルを取得できませんでした（${response.status}）。`);
-  return parseModel(await response.arrayBuffer(), config);
+  const data = await response.arrayBuffer();
+  const model = parseModel(data, config);
+  if (globalThis.crypto?.subtle) {
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    model.fingerprint = [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, '0')).join('');
+  } else {
+    let hash = 2166136261;
+    for (const byte of new Uint8Array(data)) hash = Math.imul(hash ^ byte, 16777619);
+    model.fingerprint = `${data.byteLength}-${hash >>> 0}`;
+  }
+  return model;
 }
