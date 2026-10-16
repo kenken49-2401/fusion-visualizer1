@@ -2,18 +2,23 @@ import { Box3, EdgesGeometry, Vector3 } from 'three';
 import type { Body, LoadedModel } from './model-loader';
 import './drawings.css';
 
-export type DrawingView = 'front' | 'right' | 'top';
+export type DrawingView = 'front' | 'back' | 'left' | 'right' | 'top' | 'bottom';
 export interface DrawingEdge { start: Vector3; end: Vector3; lengthMM: number }
 export interface DrawingPart { id: string; number: number; name: string; bounds: Box3; sizeMM: Vector3; edges: DrawingEdge[] }
-const viewNames: Record<DrawingView, string> = { front: '正面（X / Y）', right: '右側面（−Z / Y）', top: '平面（X / −Z）' };
+const viewNames: Record<DrawingView, string> = {
+  front: '正面（前）', back: '背面（後）', left: '左側面', right: '右側面', top: '上面（平面）', bottom: '下面',
+};
 const note = '3MFメッシュから作成 / 全ボディ対象 / 単位 mm / 外接寸法・辺長は近似値';
 const detail = '外接寸法は配置後の X幅・Z奥行・Y高さ。辺長は3D実長（投影寸法とは異なります）。曲面は線分近似、稜線は角度1°以上。隠線処理・CAD公差・加工寸法の保証はありません。';
 const fmt = (n: number) => n.toLocaleString('ja-JP', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 /** Coordinates remain in world meters; SVG uses an inverted vertical axis. */
 export function projectPoint(point: Vector3, view: DrawingView): [number, number] {
+  if (view === 'back') return [-point.x, -point.y];
+  if (view === 'left') return [point.z, -point.y];
   if (view === 'right') return [-point.z, -point.y];
   if (view === 'top') return [point.x, point.z];
+  if (view === 'bottom') return [point.x, -point.z];
   return [point.x, -point.y];
 }
 
@@ -192,7 +197,8 @@ export function mountDrawings({ model, title, trigger }: { model: LoadedModel; t
       }
     }
     const left = x(b.minX), right = x(b.maxX), top = y(b.minY), bottom = y(b.maxY);
-    const axes = direction === 'front' ? ['X', 'Y'] : direction === 'right' ? ['Z', 'Y'] : ['X', 'Z'];
+    const axes = direction === 'front' || direction === 'back' ? ['X', 'Y']
+      : direction === 'right' || direction === 'left' ? ['Z', 'Y'] : ['X', 'Z'];
     const dimension = (horizontal: boolean) => {
       const group = svgNode('g', { 'data-projected-dimension': horizontal ? 'width' : 'height' }); svg.append(group);
       const ax = horizontal ? left : right + 29, ay = horizontal ? bottom + 35 : top;

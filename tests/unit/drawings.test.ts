@@ -13,13 +13,19 @@ describe('drawing measurements', () => {
   it('projects consistent front, right and top directions without changing 3D data', () => {
     const point = new Vector3(2, 3, 4);
     expect(projectPoint(point, 'front')).toEqual([2, -3]);
+    expect(projectPoint(point, 'back')).toEqual([-2, -3]);
     expect(projectPoint(point, 'right')).toEqual([-4, -3]);
+    expect(projectPoint(point, 'left')).toEqual([4, -3]);
     expect(projectPoint(point, 'top')).toEqual([2, 4]);
+    expect(projectPoint(point, 'bottom')).toEqual([2, -4]);
     expect(point.toArray()).toEqual([2, 3, 4]);
     const box = new Box3(new Vector3(-1, 0, -2), new Vector3(2, 4, 3));
     expect(projectedBounds(box, 'front')).toMatchObject({ widthMM: 3000, heightMM: 4000 });
     expect(projectedBounds(box, 'right')).toMatchObject({ widthMM: 5000, heightMM: 4000 });
     expect(projectedBounds(box, 'top')).toMatchObject({ widthMM: 3000, heightMM: 5000 });
+    expect(projectedBounds(box, 'back')).toMatchObject({ minX: -2, maxX: 1, widthMM: 3000, heightMM: 4000 });
+    expect(projectedBounds(box, 'left')).toMatchObject({ minX: -2, maxX: 3, widthMM: 5000, heightMM: 4000 });
+    expect(projectedBounds(box, 'bottom')).toMatchObject({ minY: -3, maxY: 2, widthMM: 3000, heightMM: 5000 });
   });
 
   it('uses nested scale, translation and rotation, including hidden instance bodies', () => {
@@ -97,7 +103,7 @@ describe('edge annotations use actual model coordinates', () => {
       dialog.querySelector<SVGElement>('[data-drawing-part="0"]')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       expect(dialog.querySelector<HTMLSelectElement>('select[aria-label="図面の部品"]')!.value).toBe('0');
       const edges = measurePart(part, 0).edges;
-      const check = (index: number, view: 'front' | 'right' | 'top') => {
+      const check = (index: number, view: 'front' | 'back' | 'right' | 'left' | 'top' | 'bottom') => {
         const line = dialog.querySelector<SVGLineElement>('[data-selected-edge]')!;
         expect(line).not.toBeNull();
         expect(Number(line.getAttribute('data-length-mm'))).toBeCloseTo(edges[index].lengthMM, 5);
@@ -127,6 +133,12 @@ describe('edge annotations use actual model coordinates', () => {
       expect(dialog.querySelector<HTMLSelectElement>('select[aria-label="辺の3D実長"]')!.value).toBe('1'); check(1, 'right');
       expect(dialog.querySelector('[data-selected-edge]')!.outerHTML).not.toBe(frontCoordinates);
       direction.value = 'top'; direction.dispatchEvent(new Event('change')); check(1, 'top');
+      expect(Array.from(direction.options).map(option => option.value).sort()).toEqual(['back', 'bottom', 'front', 'left', 'right', 'top']);
+      for (const view of ['back', 'left', 'bottom', 'front', 'right', 'top'] as const) {
+        direction.value = view; direction.dispatchEvent(new Event('change'));
+        expect(dialog.querySelector<HTMLSelectElement>('select[aria-label="辺の3D実長"]')!.value).toBe('1');
+        check(1, view);
+      }
     } finally {
       dispose(); trigger.remove(); HTMLDialogElement.prototype.showModal = originalModal; Element.prototype.scrollIntoView = originalScroll;
       geometry.dispose(); (part.meshes[0].material as MeshBasicMaterial).dispose();

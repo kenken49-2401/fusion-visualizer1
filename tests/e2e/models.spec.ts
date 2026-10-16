@@ -82,8 +82,17 @@ test('clicking an actual drawing edge attaches its true length to both projected
     for (const pair of coordinates) expect(pair.marker).toEqual(pair.line);
   };
   await assertEndpoints();
-  await dialog.getByLabel('図面の方向', { exact: true }).selectOption('right');
-  await expect(dialog.getByLabel('辺の3D実長', { exact: true })).toHaveValue(target.index);
-  expect(Number(await dialog.locator('[data-selected-edge]').getAttribute('data-length-mm'))).toBeCloseTo(selectedLength, 6);
-  await assertEndpoints();
+  const direction = dialog.getByLabel('図面の方向', { exact: true });
+  await expect(direction.locator('option')).toHaveCount(6);
+  for (const [value, title] of [['front', '正面'], ['back', '背面'], ['right', '右側面'], ['left', '左側面'], ['top', '上面'], ['bottom', '下面']]) {
+    await direction.selectOption(value);
+    await expect(dialog.locator('svg')).toHaveAttribute('data-drawing-view', value);
+    await expect(dialog.locator('svg')).toContainText(title);
+    await expect(dialog.getByLabel('辺の3D実長', { exact: true })).toHaveValue(target.index);
+    expect(Number(await dialog.locator('[data-selected-edge]').getAttribute('data-length-mm'))).toBeCloseTo(selectedLength, 6);
+    await assertEndpoints();
+  }
+  const download = page.waitForEvent('download');
+  await dialog.getByRole('button', { name: 'SVG保存', exact: true }).click();
+  expect((await download).suggestedFilename()).toMatch(/^drawing-bottom-.*\.svg$/);
 });
