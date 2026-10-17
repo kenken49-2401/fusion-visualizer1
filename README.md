@@ -4,6 +4,8 @@ Fusion から書き出した 3MF を、スマートフォンや PC のブラウ�
 
 **公開サイト:** https://kenken49-2401.github.io/fusion-visualizer1/
 
+**制作手順アプリのPC編集版:** [Windows用ZIPをダウンロード](https://kenken49-2401.github.io/fusion-visualizer1/downloads/fusion-editor-windows.zip)して展開し、`Start-Editor.cmd` をダブルクリックします。Node.js 24 LTS 以降が必要です。以後は起動時にGitHub上のアプリの更新を取り込みます。[詳しい起動・更新方法](assembly-guide/README.md#windowsで簡単に起動自動更新)を参照してください。
+
 ![3Dビューア画面](docs/preview-desktop.png)
 
 [スマートフォン表示例](docs/preview-mobile.png)

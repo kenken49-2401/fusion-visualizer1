@@ -15,6 +15,16 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  desktop-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Verify Windows launcher and updater
+        run: node --test tools/tests/archive.test.mjs tools/tests/launcher.test.mjs tools/tests/update.test.mjs
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -25,6 +35,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      - name: Test desktop updater
+        run: node --test tools/tests/*.test.mjs
       - name: Build
         run: npm run build
         env:
@@ -37,12 +49,14 @@ jobs:
           cp -R assembly-guide/dist dist/assembly-guide
         env:
           BASE_PATH: /${{ github.event.repository.name }}/assembly-guide/
+      - name: Package Windows editor
+        run: node tools/package-desktop.mjs --output dist/downloads
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
   deploy:
-    needs: build
+    needs: [build, desktop-windows]
     runs-on: ubuntu-latest
     environment:
       name: github-pages

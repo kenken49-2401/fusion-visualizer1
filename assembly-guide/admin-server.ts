@@ -44,7 +44,7 @@ export function guideAdmin(): Plugin {
             }
             server.middlewares.use(async (req, res, next) => {
                 const url = new URL(req.url || '/', 'http://localhost');
-                if (!['/__guide/config', '/__guide/save', '/__guide/sync'].includes(url.pathname))
+                if (!['/__guide/runtime', '/__guide/config', '/__guide/save', '/__guide/sync'].includes(url.pathname))
                     return next();
                 res.setHeader('Content-Type', 'application/json; charset=utf-8');
                 res.setHeader('Cache-Control', 'no-store');
@@ -53,6 +53,8 @@ export function guideAdmin(): Plugin {
                 const host = req.headers.host || '';
                 if (!/^(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/.test(host) || !['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress || ''))
                     return send(403, { error: '編集画面は開発者のPC内だけで使用できます。' });
+                if (url.pathname === '/__guide/runtime' && req.method === 'GET')
+                    return send(200, { app: 'fusion-assembly-guide', mode: 'admin' });
                 if (url.pathname === '/__guide/config' && req.method === 'GET') {
                     try {
                         const s = await selected(url.searchParams.get('product'));
@@ -62,7 +64,7 @@ export function guideAdmin(): Plugin {
                         return send(400, { error: '手順データを読み取れません。' });
                     }
                 }
-                if (req.method !== 'POST' || url.pathname === '/__guide/config')
+                if (req.method !== 'POST' || !['/__guide/save', '/__guide/sync'].includes(url.pathname))
                     return send(405, { error: '対応していない操作です。' });
                 if (req.headers.origin !== `http://${host}` || req.headers['content-type']?.split(';')[0] !== 'application/json')
                     return send(403, { error: '同じ編集画面から保存してください。' });

@@ -45,9 +45,13 @@ test('public build has no editor module or writable route even with an edit quer
     for (const url of scripts) {
         const response = await request.get(url);
         const source = await response.text();
-        for (const marker of ['/__guide/save', '/__guide/sync', '制作手順の編集者モード'])
+        for (const marker of ['/__guide/runtime', '/__guide/save', '/__guide/sync', '制作手順の編集者モード'])
             expect(source).not.toContain(marker);
     }
     const response = await request.post('/__guide/save', { data: {} });
     expect(response.status()).toBeGreaterThanOrEqual(400);
+    // A static SPA host may fall back to index.html for unknown GET paths.
+    const runtime = await request.get('/__guide/runtime');
+    expect(runtime.headers()['content-type']).not.toContain('application/json');
+    expect(await runtime.text()).not.toContain('"mode":"admin"');
 });

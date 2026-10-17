@@ -73,6 +73,9 @@ test('surface placement uses a real model hit, ignores drags, and saves position
 });
 test('local endpoints enforce origin, body IDs, schema and revision conflicts', async ({ request }) => {
     const base = 'http://127.0.0.1:5274', headers = { Origin: base };
+    expect(await (await request.get('/__guide/runtime')).json()).toEqual({ app: 'fusion-assembly-guide', mode: 'admin' });
+    expect((await request.post('/__guide/runtime', { headers, data: {} })).status()).toBe(405);
+    expect((await request.get('/__guide/runtime', { headers: { Host: 'other.example' } })).status()).toBe(403);
     const initial = await (await request.get('/__guide/config?product=pillar-decoration')).json();
     expect((await request.post('/__guide/save', { headers: { Origin: 'https://other.example' }, data: {} })).status()).toBe(403);
     const invalid = structuredClone(initial.guide);
