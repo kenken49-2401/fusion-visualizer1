@@ -29,6 +29,14 @@ jobs:
         run: npm run build
         env:
           BASE_PATH: /${{ github.event.repository.name }}/
+      - name: Build independent assembly guide
+        run: |
+          npm --prefix assembly-guide ci
+          npm --prefix assembly-guide test
+          npm --prefix assembly-guide run build
+          cp -R assembly-guide/dist dist/assembly-guide
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}/assembly-guide/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

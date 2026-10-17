@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "productId": "figure-stand",
+  "title": "人形立て",
+  "summary": "表示確認用の下書きです。制作順・固定方法・ビスの仕様と数量は未設定です。編集者が実際の制作内容に合わせて設定してください。",
+  "status": "draft",
+  "materials": [
+    {
+      "id": "part-1",
+      "name": "1. ボディ2",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する部品です。実際の部材名に編集してください。"
+    },
+    {
+      "id": "fasteners",
+      "name": "固定用ビス（仕様を設定）",
+      "quantity": "未設定",
+      "unit": "本",
+      "icon": "screw",
+      "note": "種類・長さ・数量は編集者が実際の仕様に合わせて入力します。"
+    }
+  ],
+  "steps": [
+    {
+      "id": "step-1",
+      "title": "部品を確認する",
+      "description": "表示確認用の下書きサンプルです。赤い部品がこのステップで追加される部品です。実際の制作順序・日本語の作業説明は、編集者モードで手動入力してください。",
+      "bodyIds": [
+        "build:0/object:1"
+      ],
+      "materials": [
+        {
+          "materialId": "part-1",
+          "quantity": "1"
+        }
+      ],
+      "tools": [],
+      "methods": [],
+      "markers": [
+        {
+          "id": "example-fixing",
+          "type": "screw",
+          "label": "固定位置の例（未確認・編集してください）",
+          "position": [
+            -15.0,
+            1500.0,
+            20.0
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "lengthMM": 40
+        }
+      ]
+    }
+  ]
+}
