@@ -124,7 +124,12 @@ test('skips deleted old entries, local ID/config/file aliases and incomplete gui
   for (const prefix of ['public/', 'assembly-guide/public/']) {
     const catalog = JSON.parse(await content(root, `${prefix}catalog.json`));
     assert.deepEqual(catalog.models.map(e => e.id), ['stand', 'new-one', 'personal-two', ...(prefix === 'public/' ? ['new-four'] : [])]);
-    for (const id of ['retired', 'new-one', 'new-two', 'new-three']) await assert.rejects(lstat(join(root, `${prefix}models/${id}.3mf`)), { code: 'ENOENT' });
+    for (const id of ['retired', 'new-one', 'new-two']) await assert.rejects(lstat(join(root, `${prefix}models/${id}.3mf`)), { code: 'ENOENT' });
+    // A case-insensitive filesystem resolves the lowercase path to the user's
+    // uppercase file. Check actual directory entries instead of stat aliases.
+    const names = await readdir(join(root, `${prefix}models`));
+    assert(names.includes('NEW-THREE.3mf'));
+    assert(!names.includes('new-three.3mf'));
     assert.equal(await content(root, `${prefix}models/NEW-THREE.3mf`), 'user case alias');
   }
 });
