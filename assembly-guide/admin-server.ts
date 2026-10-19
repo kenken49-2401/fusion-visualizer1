@@ -30,8 +30,10 @@ function bodyIds(data: Uint8Array): string[] {
     return ids;
 }
 export function guideAdmin(): Plugin {
-    return { name: 'local-guide-editor', apply: 'serve', async configureServer(server) {
-            const root = server.config.root;
+    return { name: 'local-guide-editor', apply: 'serve', async configResolved(config) {
+            // Vite snapshots publicDir after configResolved and before configureServer.
+            // Finish desktop data migration before that snapshot includes new models.
+            const root = config.root;
             const preparation = resolve(root, '../tools/prepare-desktop.mjs');
             let hasPreparation = true;
             try { await access(preparation); } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') hasPreparation = false; else throw error; }
@@ -39,6 +41,8 @@ export function guideAdmin(): Plugin {
                 const { prepareDesktopEditor } = await import(pathToFileURL(preparation).href);
                 await prepareDesktopEditor(root);
             }
+        }, configureServer(server) {
+            const root = server.config.root;
             let busy = false;
             const git = async (args: string[], cwd = root) => (await exec('git', args, { cwd, timeout: 90000, maxBuffer: 1024 * 1024, env: { ...process.env, GIT_TERMINAL_PROMPT: '0', GCM_INTERACTIVE: 'never' } })).stdout;
             async function selected(id: unknown) {
