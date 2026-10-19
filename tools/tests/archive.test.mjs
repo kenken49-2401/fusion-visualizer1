@@ -71,6 +71,7 @@ test('package contains tracked source and verified baseline, excluding generated
     assert.equal(metadata.archive, `https://kenken49-2401.github.io/fusion-visualizer1/downloads/fusion-editor-${commit}.zip`);
     const files = unpackArchive(zip), state = JSON.parse(files.get('.local/desktop-update.json'));
     assert.equal(state.commit, commit); assert.equal(state.schemaVersion, 1);
+    assert.equal(state.dataMergeVersion, 1);
     assert.deepEqual([...files.keys()].sort(), ['.local/desktop-update.json', 'Start-Editor.cmd', 'assembly-guide/a.txt', 'package.json', 'tools/日本語 file.mjs'].sort());
     assert.equal(Object.keys(state.files).length, files.size - 1);
     for (const [path, hash] of Object.entries(state.files)) assert.equal(hash, createHash('sha256').update(files.get(path)).digest('hex'));

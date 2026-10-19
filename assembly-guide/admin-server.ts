@@ -1,5 +1,6 @@
-import { readFile, writeFile, rename, mkdir, unlink } from 'node:fs/promises';
+import { readFile, writeFile, rename, mkdir, unlink, access } from 'node:fs/promises';
 import { resolve, relative } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -29,8 +30,15 @@ function bodyIds(data: Uint8Array): string[] {
     return ids;
 }
 export function guideAdmin(): Plugin {
-    return { name: 'local-guide-editor', apply: 'serve', configureServer(server) {
+    return { name: 'local-guide-editor', apply: 'serve', async configureServer(server) {
             const root = server.config.root;
+            const preparation = resolve(root, '../tools/prepare-desktop.mjs');
+            let hasPreparation = true;
+            try { await access(preparation); } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') hasPreparation = false; else throw error; }
+            if (hasPreparation) {
+                const { prepareDesktopEditor } = await import(pathToFileURL(preparation).href);
+                await prepareDesktopEditor(root);
+            }
             let busy = false;
             const git = async (args: string[], cwd = root) => (await exec('git', args, { cwd, timeout: 90000, maxBuffer: 1024 * 1024, env: { ...process.env, GIT_TERMINAL_PROMPT: '0', GCM_INTERACTIVE: 'never' } })).stdout;
             async function selected(id: unknown) {

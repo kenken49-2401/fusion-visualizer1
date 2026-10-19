@@ -1,0 +1,270 @@
+{
+  "schemaVersion": 1,
+  "productId": "standing-desk-large",
+  "title": "立ち机 大",
+  "summary": "モデル表示確認用の下書きです。全ボディを1つの確認ステップにまとめています。制作順序・接合方法・固定位置・工具・部材仕様は未確認です。実際の制作内容を確認してから編集してください。",
+  "status": "draft",
+  "materials": [
+    {
+      "id": "part-1",
+      "name": "1. 5",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    },
+    {
+      "id": "part-2",
+      "name": "2. ボディ1",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    },
+    {
+      "id": "part-3",
+      "name": "3. ボディ1",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    },
+    {
+      "id": "part-4",
+      "name": "4. ボディ14",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    },
+    {
+      "id": "part-5",
+      "name": "5. ボディ15",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    },
+    {
+      "id": "part-6",
+      "name": "6. ボディ2",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    },
+    {
+      "id": "part-7",
+      "name": "7. ボディ2",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    },
+    {
+      "id": "part-8",
+      "name": "8. ボディ2",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    },
+    {
+      "id": "part-9",
+      "name": "9. ボディ25",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    },
+    {
+      "id": "part-10",
+      "name": "10. ボディ26",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    },
+    {
+      "id": "part-11",
+      "name": "11. ボディ28",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    },
+    {
+      "id": "part-12",
+      "name": "12. ボディ29",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    },
+    {
+      "id": "part-13",
+      "name": "13. ボディ3",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    },
+    {
+      "id": "part-14",
+      "name": "14. ボディ32",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    },
+    {
+      "id": "part-15",
+      "name": "15. ボディ33",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    },
+    {
+      "id": "part-16",
+      "name": "16. ボディ34",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    },
+    {
+      "id": "part-17",
+      "name": "17. ボディ6",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    },
+    {
+      "id": "part-18",
+      "name": "18. ボディ7",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    },
+    {
+      "id": "part-19",
+      "name": "19. 天板支え",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    }
+  ],
+  "steps": [
+    {
+      "id": "step-1",
+      "title": "モデル全体を確認する（下書き）",
+      "description": "モデルに含まれる全ボディを表示しています。この表示は組立順序や作業方法を示すものではありません。実際の制作手順・部材仕様・固定方法を確認し、編集者が手順を設定してください。",
+      "bodyIds": [
+        "build:0/object:1",
+        "build:1/object:3",
+        "build:2/object:5",
+        "build:3/object:7",
+        "build:4/object:9",
+        "build:5/object:11",
+        "build:6/object:13",
+        "build:7/object:15",
+        "build:8/object:17",
+        "build:9/object:19",
+        "build:10/object:21",
+        "build:11/object:23",
+        "build:12/object:25",
+        "build:13/object:27",
+        "build:14/object:29",
+        "build:15/object:31",
+        "build:16/object:33",
+        "build:17/object:35",
+        "build:18/object:37"
+      ],
+      "materials": [
+        {
+          "materialId": "part-1",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-2",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-3",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-4",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-5",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-6",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-7",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-8",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-9",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-10",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-11",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-12",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-13",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-14",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-15",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-16",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-17",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-18",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-19",
+          "quantity": "1"
+        }
+      ],
+      "tools": [],
+      "methods": [],
+      "markers": []
+    }
+  ]
+}

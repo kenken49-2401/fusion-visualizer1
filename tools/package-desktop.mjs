@@ -35,7 +35,7 @@ export async function buildDesktopPackage({ root, output, commit }) {
     files.set(path, bytes); hashes[path] = digest(bytes);
   }
   if (!files.size) throw new Error('No tracked source files to package.');
-  files.set('.local/desktop-update.json', Buffer.from(JSON.stringify({ schemaVersion: 1, commit, files: hashes }, null, 2) + '\n'));
+  files.set('.local/desktop-update.json', Buffer.from(JSON.stringify({ schemaVersion: 1, commit, dataMergeVersion: 1, files: hashes }, null, 2) + '\n'));
   const archive = packArchive(files);
   const metadata = { schemaVersion: 1, repository, commit, archive: `https://kenken49-2401.github.io/fusion-visualizer1/downloads/fusion-editor-${commit}.zip`, sha256: digest(archive) };
   await mkdir(output, { recursive: true });

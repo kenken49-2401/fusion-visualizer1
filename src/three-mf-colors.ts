@@ -5,6 +5,39 @@ import { validateColors } from './config.ts';
 const children = (node: Element, name: string): Element[] => Array.from(node.childNodes).filter((n): n is Element => n.nodeType === 1 && (n as Element).localName === name);
 const child = (node: Element, name: string) => children(node, name)[0];
 
+/** Stable traversal order lets config references follow resource IDs cloned by color baking. */
+export function readBodyIds(input: Uint8Array): string[] {
+  const files = unzipSync(input);
+  const parse = (data: Uint8Array | undefined) => {
+    if (!data) throw new Error('3MF のモデル参照が不正です。');
+    const source = strFromU8(data);
+    if (/<!DOCTYPE|<!ENTITY/i.test(source)) throw new Error('3MF XML の宣言には対応していません。');
+    return new DOMParser().parseFromString(source, 'application/xml');
+  };
+  const rels = parse(files['_rels/.rels']);
+  const rel = Array.from(rels.getElementsByTagNameNS('*', 'Relationship')).find(n => n.getAttribute('Type')?.endsWith('/3dmodel'));
+  const path = rel?.getAttribute('Target')?.replace(/^\//, '');
+  if (!path || rel?.getAttribute('TargetMode') === 'External' || Object.keys(files).filter(p => p.endsWith('.model')).length !== 1) throw new Error('3MF のモデル参照が不正です。');
+  const root = parse(files[path]).documentElement!;
+  const resources = child(root, 'resources'), build = child(root, 'build');
+  if (!resources || !build) throw new Error('3MF の構造が不正です。');
+  const objects = new Map(children(resources, 'object').map(n => [n.getAttribute('id')!, n]));
+  const ids: string[] = [];
+  function visit(objectId: string, id: string, depth: number) {
+    if (depth > 64) throw new Error('モデル階層が深すぎます。');
+    const object = objects.get(objectId);
+    if (!object) throw new Error('3MF 内の部品参照が不正です。');
+    if (child(object, 'mesh')) ids.push(id);
+    else {
+      const components = child(object, 'components');
+      if (components) children(components, 'component').forEach((ref, index) => visit(ref.getAttribute('objectid')!, `${id}/component:${index}/object:${ref.getAttribute('objectid')}`, depth + 1));
+    }
+  }
+  children(build, 'item').forEach((ref, index) => visit(ref.getAttribute('objectid')!, `build:${index}/object:${ref.getAttribute('objectid')}`, 0));
+  if (!ids.length) throw new Error('表示できるボディがありません。');
+  return ids;
+}
+
 /** Bake colors into material resources, isolating repeated assembly occurrences. */
 export function bakeColors(input: Uint8Array, requested: Record<string, string>): Uint8Array {
   const colors = validateColors(requested);

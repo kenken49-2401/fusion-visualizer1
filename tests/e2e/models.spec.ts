@@ -4,6 +4,7 @@ test('the selector loads all actual models, preserves links and distinguishes re
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
   await expect(page.locator('#viewport')).toHaveAttribute('data-ready', 'true');
+  await expect(page.getByLabel('閲覧するモデル', { exact: true }).locator('option')).toHaveCount(5);
   await page.getByLabel('閲覧するモデル', { exact: true }).selectOption('pillar-decoration');
   await expect(page.locator('#viewport')).toHaveAttribute('data-model-id', 'pillar-decoration');
   await expect(page.locator('#model-name')).toHaveText('柱装飾');
@@ -19,6 +20,24 @@ test('the selector loads all actual models, preserves links and distinguishes re
   await page.reload();
   await expect(page.locator('#viewport')).toHaveAttribute('data-model-id', 'signage');
   expect(errors).toEqual([]);
+});
+
+test('attached standing desks load real bodies and dimensions through the model selector', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#viewport')).toHaveAttribute('data-ready', 'true');
+  for (const [id, title, count, triangles, size] of [
+    ['standing-desk-large', '立ち机 大', '19', '308', '2,300 × 880 × 980 mm'],
+    ['standing-desk-small', '立ち机 小', '13', '428', '1,820 × 910 × 992 mm'],
+  ]) {
+    await page.getByLabel('閲覧するモデル', { exact: true }).selectOption(id);
+    await expect(page.locator('#viewport')).toHaveAttribute('data-model-id', id);
+    await expect(page.locator('#viewport')).toHaveAttribute('data-triangles', triangles);
+    await expect(page.locator('#model-name')).toHaveText(title);
+    await expect(page.locator('#model-body-count')).toHaveText(`${count} ボディ`);
+    await expect(page.locator('#model-size')).toHaveText(size);
+    await page.reload();
+    await expect(page.locator('#viewport')).toHaveAttribute('data-model-id', id);
+  }
 });
 
 test('dimensioned views show true part lengths, change direction, and export an SVG', async ({ page }) => {
@@ -95,4 +114,19 @@ test('clicking an actual drawing edge attaches its true length to both projected
   const download = page.waitForEvent('download');
   await dialog.getByRole('button', { name: 'SVG保存', exact: true }).click();
   expect((await download).suggestedFilename()).toMatch(/^drawing-bottom-.*\.svg$/);
+});
+
+test('public viewers use saved groups without exposing group editing', async ({ page }) => {
+  await page.route('**/models/standing-desk-large.json', async route => {
+    const response = await route.fetch(), config = await response.json();
+    config.groups = [{ id: 'table-pair', name: '脚の組', bodyIds: ['build:0/object:1', 'build:1/object:3'] }];
+    await route.fulfill({ response, json: config });
+  });
+  await page.goto('/?model=standing-desk-large');
+  await expect(page.locator('#viewport')).toHaveAttribute('data-ready', 'true');
+  await expect(page.getByRole('button', { name: 'グループを作成', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: '脚の組の表示切り替え', exact: true }).click();
+  await expect(page.locator('#status')).toContainText('17 / 19');
+  await page.getByRole('button', { name: '脚の組のグループに注目', exact: true }).click();
+  await expect(page.locator('#status')).toContainText('19 / 19');
 });

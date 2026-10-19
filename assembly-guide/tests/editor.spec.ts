@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { readFile, writeFile } from 'node:fs/promises';
 import { PerspectiveCamera, Vector3 } from 'three';
-const files = ['figure-stand', 'pillar-decoration', 'signage'];
+const files = ['figure-stand', 'pillar-decoration', 'signage', 'standing-desk-large', 'standing-desk-small'];
 const originals = new Map<string, Buffer>();
 test.beforeAll(async () => { for (const id of files)
     originals.set(id, await readFile(`public/guides/${id}.json`)); });
@@ -88,4 +88,63 @@ test('local endpoints enforce origin, body IDs, schema and revision conflicts', 
     expect(saved.status()).toBe(200);
     expect((await saved.json()).revision).not.toBe(initial.revision);
     expect((await request.post('/__guide/save', { headers, data: { productId: 'pillar-decoration', revision: initial.revision, guide: next } })).status()).toBe(409);
+});
+
+test('author groups desk parts, renames members and assigns a group without moving another step', async ({ page }) => {
+    const model = await readFile('public/models/standing-desk-large.3mf');
+    await open(page, 'standing-desk-large');
+    await page.getByLabel('新しいグループの名前', { exact: true }).fill('脚の組');
+    await page.locator('.new-group-editor input[value="build:0/object:1"]').check();
+    await page.locator('.new-group-editor input[value="build:1/object:3"]').check();
+    await page.getByRole('button', { name: 'グループを作成', exact: true }).click();
+    await expect(page.locator('#body-groups li')).toHaveCount(1);
+    await expect(page.locator('#viewport')).toHaveAttribute('data-visible-bodies', '19');
+    await page.getByLabel('グループ 1の名前', { exact: true }).fill('机の部品');
+    await expect(page.getByRole('button', { name: '机の部品をこのステップから外す', exact: true })).toBeEnabled();
+    await page.locator('.group-editor-section fieldset[data-group-id] input[value="build:2/object:5"]').check();
+    await page.getByRole('button', { name: '手順を保存', exact: true }).click();
+    await expect(page.getByText('保存済みの手順を表示中', { exact: true })).toBeVisible();
+    let saved = JSON.parse(await readFile('public/guides/standing-desk-large.json', 'utf8'));
+    expect(saved.groups[0]).toMatchObject({ name: '机の部品', bodyIds: ['build:0/object:1', 'build:1/object:3', 'build:2/object:5'] });
+    expect(saved.steps[0].bodyIds).toHaveLength(19);
+    expect(await readFile('public/models/standing-desk-large.3mf')).toEqual(model);
+    await page.getByRole('button', { name: 'ステップを追加', exact: true }).click();
+    await expect(page.getByRole('button', { name: '机の部品をこのステップに追加', exact: true })).toBeDisabled();
+    await expect(page.locator('.step-group-shortcut')).toContainText('別ステップで割当済み 3');
+    await page.getByLabel('編集するステップ', { exact: true }).selectOption('0');
+    await page.getByRole('button', { name: '机の部品をこのステップから外す', exact: true }).click();
+    await expect(page.locator('#viewport')).toHaveAttribute('data-visible-bodies', '16');
+    await page.getByLabel('編集するステップ', { exact: true }).selectOption('1');
+    await page.getByRole('button', { name: '机の部品をこのステップに追加', exact: true }).click();
+    await expect(page.locator('#viewport')).toHaveAttribute('data-visible-bodies', '19');
+    await expect(page.locator('#viewport')).toHaveAttribute('data-new-bodies', '3');
+    await page.getByRole('button', { name: '机の部品の表示中の部品に注目', exact: true }).click();
+    await expect(page.locator('#viewport')).toHaveAttribute('data-visible-bodies', '19');
+    await expect(page.locator('#viewport')).toHaveAttribute('data-new-bodies', '3');
+    await page.getByRole('button', { name: '手順を保存', exact: true }).click();
+    await expect(page.getByText('保存済みの手順を表示中', { exact: true })).toBeVisible();
+    await page.reload();
+    await expect(page.locator('#viewport')).toHaveAttribute('data-ready', 'true');
+    await expect(page.locator('#body-groups li')).toContainText('机の部品');
+    await page.getByRole('button', { name: '手順を編集（開発者用）', exact: true }).click();
+    await page.getByRole('button', { name: 'グループ「机の部品」を削除', exact: true }).click();
+    await page.getByRole('button', { name: '手順を保存', exact: true }).click();
+    await expect(page.getByText('保存済みの手順を表示中', { exact: true })).toBeVisible();
+    saved = JSON.parse(await readFile('public/guides/standing-desk-large.json', 'utf8'));
+    expect(saved.groups).toEqual([]); expect(saved.steps.map((s: {bodyIds: string[]}) => s.bodyIds.length)).toEqual([16, 3]);
+    expect(await readFile('public/models/standing-desk-large.3mf')).toEqual(model);
+});
+
+test('guide groups reject unknown or overlapping members and persist in the existing guide endpoint', async ({ request }) => {
+    const headers = { Origin: 'http://127.0.0.1:5274' }, productId = 'standing-desk-small';
+    const initial = await (await request.get(`/__guide/config?product=${productId}`)).json();
+    const group = { id: 'test-pair', name: '机の組', bodyIds: ['build:0/object:1', 'build:1/object:3'] };
+    for (const groups of [[{ ...group, bodyIds: ['build:999/object:1'] }], [group, { ...group, id: 'duplicate', name: '重複所属' }]]) {
+        const guide = { ...initial.guide, groups };
+        expect((await request.post('/__guide/save', { headers, data: { productId, revision: initial.revision, guide } })).status()).toBe(400);
+    }
+    const guide = { ...initial.guide, groups: [group] };
+    const response = await request.post('/__guide/save', { headers, data: { productId, revision: initial.revision, guide } });
+    expect(response.status()).toBe(200); expect((await response.json()).guide.groups).toEqual([group]);
+    expect((await request.post('/__guide/save', { headers, data: { productId, revision: initial.revision, guide } })).status()).toBe(409);
 });

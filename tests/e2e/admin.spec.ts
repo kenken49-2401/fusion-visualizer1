@@ -135,3 +135,67 @@ test('duplicate body names have numbered editor labels and independent presets',
   await expect(panel.getByRole('button', { name: 'ボディ1 · 01に注目', exact: true })).toHaveCount(1);
   await panel.getByRole('button', { name: '変更を取り消す', exact: true }).click();
 });
+
+test('groups save without changing mesh bytes, survive reload, rename, recolor and delete', async ({ page }) => {
+  const configPath = 'public/models/standing-desk-large.json', modelPath = 'public/models/standing-desk-large.3mf';
+  await page.goto('/?model=standing-desk-large');
+  await expect(page.locator('#viewport')).toHaveAttribute('data-ready', 'true');
+  await page.getByRole('button', { name: '色を編集（開発者用）', exact: true }).click();
+  await page.getByLabel('グループ名', { exact: true }).fill('脚の組');
+  await page.locator('.group-member input[data-body-id="build:0/object:1"]').check();
+  await page.locator('.group-member input[data-body-id="build:1/object:3"]').check();
+  await page.getByRole('button', { name: 'グループを作成', exact: true }).click();
+  await expect(page.locator('.public-group')).toHaveCount(1);
+  await page.getByRole('button', { name: '脚の組の表示切り替え', exact: true }).click();
+  await expect(page.locator('#status')).toContainText('17 / 19');
+  await expect(page.locator('.body-row.is-hidden')).toHaveCount(2);
+  await page.getByRole('button', { name: '脚の組のグループに注目', exact: true }).click();
+  await expect(page.locator('#status')).toContainText('19 / 19');
+  await page.getByRole('button', { name: '設定を保存', exact: true }).click();
+  await expect(page.locator('.editor-state')).toContainText('保存済み');
+  expect(readFileSync(modelPath)).toEqual(originals.get(modelPath));
+  let config = JSON.parse(readFileSync(configPath, 'utf8'));
+  expect(config.groups[0]).toMatchObject({ name: '脚の組', bodyIds: ['build:0/object:1', 'build:1/object:3'] });
+  await page.reload();
+  await expect(page.locator('#viewport')).toHaveAttribute('data-ready', 'true');
+  await expect(page.getByRole('button', { name: '脚の組の表示切り替え', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '色を編集（開発者用）', exact: true }).click();
+  await page.getByRole('button', { name: '脚の組を編集', exact: true }).click();
+  await page.getByLabel('グループ名', { exact: true }).fill('脚と補強');
+  await page.locator('.group-member input[data-body-id="build:2/object:5"]').check();
+  await page.getByRole('button', { name: 'グループを更新', exact: true }).click();
+  await page.getByLabel('脚と補強の一括適用色', { exact: true }).fill('#123456');
+  await page.getByRole('button', { name: '脚と補強に色を一括適用', exact: true }).click();
+  for (const index of [0, 1, 2]) await expect(page.locator('.body-swatch').nth(index)).toHaveCSS('background-color', 'rgb(18, 52, 86)');
+  await page.getByRole('button', { name: '設定を保存', exact: true }).click();
+  await expect(page.locator('.editor-state')).toContainText('保存済み');
+  config = JSON.parse(readFileSync(configPath, 'utf8'));
+  expect(config.groups[0].name).toBe('脚と補強'); expect(config.groups[0].bodyIds).toHaveLength(3);
+  const coloredModel = readFileSync(modelPath);
+  await page.getByRole('button', { name: '脚と補強を削除', exact: true }).click();
+  await page.getByRole('button', { name: '設定を保存', exact: true }).click();
+  await expect(page.locator('.editor-state')).toContainText('保存済み');
+  expect(JSON.parse(readFileSync(configPath, 'utf8')).groups).toEqual([]);
+  expect(readFileSync(modelPath)).toEqual(coloredModel);
+  await expect(page.locator('.body-row')).toHaveCount(19);
+});
+
+test('group endpoint validates membership, rejects stale writes and keeps groups for older color clients', async ({ request }) => {
+  const headers = { Origin: 'http://127.0.0.1:5174' }, modelId = 'standing-desk-small';
+  const initial = await (await request.get(`/__admin/config?model=${modelId}`)).json();
+  const group = { id: 'test-pair', name: '2つの部品', bodyIds: ['build:0/object:1', 'build:1/object:3'] };
+  for (const groups of [
+    [{ ...group, bodyIds: ['build:999/object:1'] }],
+    [group, { ...group, id: 'overlap', name: '重複所属' }],
+    [{ ...group, bodyIds: [] }],
+  ]) {
+    expect((await request.post('/__admin/colors', { headers, data: { modelId, revision: initial.revision, groups } })).status()).toBe(400);
+  }
+  const saved = await request.post('/__admin/colors', { headers, data: { modelId, revision: initial.revision, groups: [group] } });
+  expect(saved.status()).toBe(200); const next = await saved.json();
+  expect(readFileSync('public/models/standing-desk-small.3mf')).toEqual(originals.get('public/models/standing-desk-small.3mf'));
+  expect((await request.post('/__admin/colors', { headers, data: { modelId, revision: initial.revision, groups: [] } })).status()).toBe(409);
+  const oldClient = await request.post('/__admin/colors', { headers, data: { modelId, revision: next.revision, colors: {} } });
+  expect(oldClient.status()).toBe(200);
+  expect((await oldClient.json()).config.groups).toEqual([group]);
+});

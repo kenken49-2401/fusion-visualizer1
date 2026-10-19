@@ -4,7 +4,7 @@ test('products, cumulative step bodies, red additions, supplies, and fixed-posit
     page.on('pageerror', e => errors.push(e.message));
     await page.goto('/?product=pillar-decoration');
     await expect(page.locator('#viewport')).toHaveAttribute('data-ready', 'true');
-    await expect(page.locator('#products a')).toHaveCount(3);
+    await expect(page.locator('#products a')).toHaveCount(5);
     await expect(page.locator('#guide-title')).toHaveText('柱装飾');
     await expect(page.locator('#viewport')).toHaveAttribute('data-visible-bodies', '1');
     await expect(page.locator('#viewport')).toHaveAttribute('data-new-bodies', '1');
@@ -35,6 +35,20 @@ test('products, cumulative step bodies, red additions, supplies, and fixed-posit
     await expect(page.locator('#viewport')).toHaveAttribute('data-product-id', 'signage');
     expect(errors).toEqual([]);
 });
+test('both attached standing desks load as complete draft models and keep their links', async ({ page }) => {
+    await page.goto('/?product=standing-desk-large');
+    await expect(page.locator('#viewport')).toHaveAttribute('data-ready', 'true');
+    for (const [id, title, count] of [['standing-desk-large', '立ち机 大', '19'], ['standing-desk-small', '立ち机 小', '13']]) {
+        await page.locator(`#products [data-product-id="${id}"]`).click();
+        await expect(page.locator('#viewport')).toHaveAttribute('data-product-id', id);
+        await expect(page.locator('#guide-title')).toHaveText(title);
+        await expect(page.locator('#viewport')).toHaveAttribute('data-visible-bodies', count);
+        await expect(page.locator('#guide-status')).toContainText('下書き');
+        await expect(page.locator('.fixing-label')).toHaveCount(0);
+        await page.reload();
+        await expect(page.locator('#viewport')).toHaveAttribute('data-product-id', id);
+    }
+});
 test('public build has no editor module or writable route even with an edit query', async ({ page, request }) => {
     const scripts: string[] = [];
     page.on('response', r => { if (r.url().endsWith('.js'))
@@ -54,4 +68,21 @@ test('public build has no editor module or writable route even with an edit quer
     const runtime = await request.get('/__guide/runtime');
     expect(runtime.headers()['content-type']).not.toContain('application/json');
     expect(await runtime.text()).not.toContain('"mode":"admin"');
+});
+
+test('public guide groups focus only already visible parts and retain the current step colors', async ({ page }) => {
+    await page.route('**/guides/standing-desk-large.json', async route => {
+        const response = await route.fetch(), guide = await response.json(), first = guide.steps[0];
+        guide.groups = [{ id: 'desk-pair', name: '机の組', bodyIds: first.bodyIds.slice(0, 2) }];
+        guide.steps = [{ ...first, bodyIds: first.bodyIds.slice(0, 1) }, { ...first, id: 'step-2', bodyIds: first.bodyIds.slice(1) }];
+        await route.fulfill({ response, json: guide });
+    });
+    await page.goto('/?product=standing-desk-large');
+    await expect(page.locator('#viewport')).toHaveAttribute('data-ready', 'true');
+    await expect(page.locator('#viewport')).toHaveAttribute('data-visible-bodies', '1');
+    await page.getByRole('button', { name: '机の組の表示中の部品に注目', exact: true }).click();
+    await expect(page.locator('#viewport')).toHaveAttribute('data-focused-group', 'desk-pair');
+    await expect(page.locator('#viewport')).toHaveAttribute('data-visible-bodies', '1');
+    await expect(page.locator('#viewport')).toHaveAttribute('data-new-bodies', '1');
+    await expect(page.getByRole('button', { name: 'グループを作成', exact: true })).toHaveCount(0);
 });

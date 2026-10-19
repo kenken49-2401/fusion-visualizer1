@@ -1,6 +1,7 @@
 import { Matrix3, Raycaster, Vector2, Vector3 } from 'three';
 import type { LoadedModel } from './model-loader';
 import type { ModelScene } from './scene';
+import { createGroupEditor, renderGroupShortcuts } from './editor-groups';
 import { newId, parseGuide, type Guide, type GuideStep, type IconKind, type MarkerKind } from './schema';
 interface Context {
     guide: Guide;
@@ -51,7 +52,8 @@ export async function mountGuideEditor(context: Context) {
     document.querySelector('.viewport-stage')!.append(hint);
     const dirty = () => JSON.stringify(guide) !== saved;
     function refresh() { save.disabled = saving || syncing || !dirty(); sync.disabled = saving || syncing || dirty(); status.textContent = saving ? '保存しています…' : dirty() ? '未保存の変更があります' : '保存済みの手順を表示中'; }
-    function touch() { context.update(guide, index); refresh(); }
+    let refreshGroupShortcuts = () => {};
+    function touch() { context.update(guide, index); refresh(); refreshGroupShortcuts(); }
     function action(text: string, fn: () => void, parent: HTMLElement = form) { const b = el('button', text); b.type = 'button'; b.addEventListener('click', fn); parent.append(b); return b; }
     function field(parent: HTMLElement, name: string, value: string, onInput: (value: string) => void, multi = false) { const label = el('label', name), input = multi ? el('textarea') : el('input'); input.value = value; input.setAttribute('aria-label', name); if (input instanceof HTMLTextAreaElement)
         input.rows = 3; input.addEventListener('input', () => { onInput(input.value); touch(); }); label.append(input); parent.append(label); return input; }
@@ -64,6 +66,7 @@ export async function mountGuideEditor(context: Context) {
         input.append(option);
     } input.value = value; input.onchange = () => change(input.value as T); label.append(input); parent.append(label); return input; }
     function section(title: string) { const s = el('section'); s.className = 'editor-section'; s.append(el('h3', title)); form.append(s); return s; }
+    const groupEditor = createGroupEditor({ getGuide: () => guide, model, onChange: rerender => { touch(); if (rerender) render(); }, notify });
     function render() {
         armed = false;
         hint.hidden = true;
@@ -75,6 +78,7 @@ export async function mountGuideEditor(context: Context) {
         select(overview, '手順の状態', guide.status, [['draft', '下書き'], ['ready', '作成者確認済み']], v => { guide.status = v; touch(); });
         const assigned = new Set(guide.steps.flatMap(s => s.bodyIds));
         overview.append(el('p', `部品の割当：${assigned.size} / ${model.bodies.length}。確認済みにするには全ての部品と各ステップの説明が必要です。`));
+        groupEditor.render(section('部品グループ'));
         const steps = section('ステップを作る');
         select(steps, '編集するステップ', String(index), guide.steps.map((s, i) => [String(i), `${i + 1}. ${s.title}`]), v => { index = Number(v); context.update(guide, index); render(); });
         const controls = el('div');
@@ -89,6 +93,9 @@ export async function mountGuideEditor(context: Context) {
         field(steps, '日本語の作業説明', step.description, v => step.description = v, true);
         const bodies = section('このステップで追加する部品');
         bodies.append(el('p', 'チェックした部品がこのステップで赤く表示されます。割当先を変える場合は元のステップのチェックを外してください。'));
+        const shortcuts = el('div'); bodies.append(shortcuts);
+        refreshGroupShortcuts = () => { shortcuts.replaceChildren(); renderGroupShortcuts(shortcuts, guide, index, () => { touch(); render(); }, notify); };
+        refreshGroupShortcuts();
         const bodyList = el('div');
         bodyList.className = 'editor-body-list';
         bodies.append(bodyList);

@@ -77,6 +77,80 @@ async function listBundle(root, path, found) {
   }
 }
 
+const pathKey = path => path.normalize('NFC').toLowerCase();
+function catalogFrom(bytes) {
+  const value = JSON.parse(bytes.toString('utf8'));
+  if (value?.schemaVersion !== 1 || !Array.isArray(value.models) || value.models.length > 100) throw new Error('Invalid catalog');
+  const ids = new Set(), configs = new Set();
+  for (const entry of value.models) {
+    if (!entry || typeof entry !== 'object' || typeof entry.id !== 'string' || !/^[a-z0-9-]{1,80}$/.test(entry.id) ||
+        typeof entry.title !== 'string' || !entry.title.trim() || entry.title.length > 160 ||
+        typeof entry.config !== 'string' || !/^(viewer\.json|models\/[a-z0-9-]+\.json)$/.test(entry.config) ||
+        ids.has(entry.id) || configs.has(pathKey(entry.config))) throw new Error('Invalid catalog entry');
+    safePath(entry.config); ids.add(entry.id); configs.add(pathKey(entry.config));
+  }
+  return value;
+}
+function configFrom(bytes) {
+  const value = JSON.parse(bytes.toString('utf8'));
+  if (value?.schemaVersion !== 1 || typeof value.model !== 'string' || !/^models\/[\w./-]+\.3mf$/i.test(value.model) ||
+      typeof value.title !== 'string' || !value.title.trim() || value.title.length > 160 ||
+      !['Y', 'Z'].includes(value.upAxis) || !['X', 'Y'].includes(value.frontAxis) ||
+      typeof value.description !== 'string' || value.description.length > 2000 ||
+      typeof value.updatedAt !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value.updatedAt) ||
+      !value.colors || typeof value.colors !== 'object' || Array.isArray(value.colors)) throw new Error('Invalid model config');
+  safePath(value.model);
+  const colors = Object.entries(value.colors);
+  if (colors.length > 2000 || colors.some(([key, color]) => !/^[\w:/.-]{1,180}$/.test(key) || key === '__proto__' || typeof color !== 'string' || !/^#[a-f0-9]{6}$/i.test(color))) throw new Error('Invalid colors');
+  return value;
+}
+
+/** Preserve the edited bundle; only install complete, previously unshipped model pairs. */
+function additiveModels(group, previous, incoming, files, current) {
+  if (!previous) return [];
+  const prefix = group === 'guide' ? 'assembly-guide/public/' : 'public/';
+  const catalogPath = `${prefix}catalog.json`;
+  let local, upstream;
+  const reserved = new Set();
+  try {
+    local = catalogFrom(current.get(catalogPath)); upstream = catalogFrom(files.get(catalogPath));
+    // Even a missing local model remains reserved by its user's catalog entry.
+    for (const entry of local.models) {
+      const configPath = `${prefix}${entry.config}`;
+      const config = configFrom(current.get(configPath));
+      reserved.add(pathKey(configPath)); reserved.add(pathKey(`${prefix}${config.model}`));
+      if (group === 'guide') reserved.add(pathKey(`${prefix}guides/${entry.id}.json`));
+    }
+    // Do not merge a release whose catalog/config references cannot be understood safely.
+    upstream.models.forEach(entry => configFrom(files.get(`${prefix}${entry.config}`)));
+  } catch { return []; }
+  const oldPaths = new Set(Object.keys(previous.files).map(pathKey));
+  const localPaths = new Set([...current].filter(([, bytes]) => bytes !== undefined).map(([path]) => pathKey(path)));
+  const ids = new Set(local.models.map(entry => entry.id));
+  const additions = [], operations = [];
+  for (const entry of upstream.models) {
+    if (ids.has(entry.id) || local.models.length + additions.length >= 100) continue;
+    const configPath = `${prefix}${entry.config}`;
+    const config = configFrom(files.get(configPath));
+    const paired = [configPath, `${prefix}${config.model}`];
+    if (group === 'guide') paired.push(`${prefix}guides/${entry.id}.json`);
+    if (paired.some(path => !files.get(path)?.length || !incoming.files[path] || oldPaths.has(pathKey(path)) || localPaths.has(pathKey(path)) || reserved.has(pathKey(path)))) continue;
+    if (group === 'guide') {
+      try {
+        const guide = JSON.parse(files.get(paired[2]).toString('utf8'));
+        if (guide?.schemaVersion !== 1 || guide.productId !== entry.id) continue;
+      } catch { continue; }
+    }
+    additions.push(entry); ids.add(entry.id);
+    for (const path of paired) {
+      reserved.add(pathKey(path)); operations.push({ path, bytes: files.get(path), expected: undefined });
+    }
+  }
+  if (!additions.length) return [];
+  operations.push({ path: catalogPath, bytes: Buffer.from(`${JSON.stringify({ ...local, models: [...local.models, ...additions] }, null, 2)}\n`), expected: current.get(catalogPath) });
+  return operations;
+}
+
 async function responseBytes(response, limit) {
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   if (Number(response.headers?.get('content-length')) > limit) throw new Error('更新データが大きすぎます。');
@@ -293,7 +367,7 @@ export async function updateDesktop(root, { manifestURL = DEFAULT_MANIFEST_URL, 
     catch { return result('offline', '更新を確認できませんでした。現在のアプリを起動します。', onMessage); }
     const manifest = JSON.parse(manifestBytes.toString('utf8'));
     if (manifest?.schemaVersion !== 1 || manifest.repository !== REPOSITORY || (typeof manifest.commit !== 'string' || !COMMIT.test(manifest.commit)) || (typeof manifest.sha256 !== 'string' || !HASH.test(manifest.sha256)) || manifest.archive !== `${DOWNLOADS}fusion-editor-${manifest.commit}.zip`) return result('skipped', '更新情報を検証できないため、更新を見送りました。', onMessage);
-    if (previous?.commit === manifest.commit) return result('current', 'アプリは最新版です。', onMessage, manifest.commit);
+    if (previous?.commit === manifest.commit && previous.dataMergeVersion === 1) return result('current', 'アプリは最新版です。', onMessage, manifest.commit);
     let archive;
     try { archive = await fetchBytes(fetchImpl, manifest.archive, 70 * 1024 * 1024, 90000); }
     catch { return result('offline', '更新ファイルを取得できませんでした。現在のアプリを起動します。', onMessage); }
@@ -329,7 +403,7 @@ export async function updateDesktop(root, { manifestURL = DEFAULT_MANIFEST_URL, 
       const baseline = previous ? previous.files[path] : incoming.files[path];
       if (hash !== baseline) preserved.add(group);
     }
-    const next = { schemaVersion: 1, commit: incoming.commit, files: { ...incoming.files } };
+    const next = { schemaVersion: 1, dataMergeVersion: 1, commit: incoming.commit, files: { ...incoming.files } };
     const operations = [];
     for (const path of paths) {
       const group = bundle(path);
@@ -347,6 +421,12 @@ export async function updateDesktop(root, { manifestURL = DEFAULT_MANIFEST_URL, 
       if (old === target) continue;
       if (hash !== old) return result('conflict', `ローカルで変更した ${path} と更新内容が競合するため、更新を見送りました。ファイルは変更していません。`, onMessage);
       operations.push({ path, bytes: files.get(path), expected: existing });
+    }
+    for (const group of preserved) {
+      for (const operation of additiveModels(group, previous, incoming, files, current)) {
+        operations.push(operation);
+        next.files[operation.path] = incoming.files[operation.path];
+      }
     }
     // Recheck originals in transact; every mutation has a backup and the state is written last.
     if (!sameBytes(await bytesAt(root, '.local/updater/update.lock'), lock)) throw new Error('更新処理の所有権が変更されたため、更新を中止しました。');

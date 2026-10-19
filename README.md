@@ -12,7 +12,7 @@ Fusion から書き出した 3MF を、スマートフォンや PC のブラウ�
 
 公開画面ではモデルの切り替え、回転・拡大縮小・視点変更、ボディの選択と表示切り替え、寸法図、2点間の測定ができます。公開色の編集はローカルの管理用開発サーバーで行います。一般の3Dモデルをアップロードする機能や、形状を編集する機能はありません。
 
-## 3つのモデルを選ぶ
+## 5つのモデルを選ぶ
 
 「モデルを選択」から切り替えられます。選択したモデルは URL の `?model=` に反映され、そのリンクを共有できます。
 
@@ -21,6 +21,8 @@ Fusion から書き出した 3MF を、スマートフォンや PC のブラウ�
 | [人形立て](https://kenken49-2401.github.io/fusion-visualizer1/?model=figure-stand) | 1 | 68 | 1000 × 40 × 1500 |
 | [柱装飾](https://kenken49-2401.github.io/fusion-visualizer1/?model=pillar-decoration) | 4 | 348 | 975 × 845 × 1990 |
 | [サイネージ](https://kenken49-2401.github.io/fusion-visualizer1/?model=signage) | 31 | 1876 | 940 × 930 × 2141.86 |
+| [立ち机 大](https://kenken49-2401.github.io/fusion-visualizer1/?model=standing-desk-large) | 19 | 308 | 2300 × 880 × 980 |
+| [立ち机 小](https://kenken49-2401.github.io/fusion-visualizer1/?model=standing-desk-small) | 13 | 428 | 1820 × 910 × 992 |
 
 同じ名前のボディは画面上で番号を付けて区別します。寸法は配置・向きを反映したメッシュの外接寸法です。人形立ての元データは X / Y / Z が 40 / 1000 / 1500 mm、上方向 Z・正面方向 X、ボディ `ボディ2` の ID は `build:0/object:1` です。柱装飾とサイネージは上方向 Z・正面方向 Y です。
 
@@ -31,6 +33,16 @@ Fusion から書き出した 3MF を、スマートフォンや PC のブラウ�
 | `figure-stand` | `public/viewer.json` | `public/models/figure-stand.3mf` |
 | `pillar-decoration` | `public/models/pillar-decoration.json` | `public/models/pillar-decoration.3mf` |
 | `signage` | `public/models/signage.json` | `public/models/signage.3mf` |
+| `standing-desk-large` | `public/models/standing-desk-large.json` | `public/models/standing-desk-large.3mf` |
+| `standing-desk-small` | `public/models/standing-desk-small.json` | `public/models/standing-desk-small.3mf` |
+
+## ボディをグループ化する
+
+ローカルの編集画面から、複数のボディを選んで名前付きグループを作成できます。名前・所属ボディの変更、グループの削除、一括での色変更に対応します。「設定を保存」でモデルの設定JSONへ保存し、「GitHubへ同期」で公開へ反映します。グループだけの保存では3MF本体を変更しません。
+
+公開の閲覧画面では、保存されたグループのボディをまとめて表示・非表示にしたり、グループへ視点を寄せたりできます。グループの作成・編集は開発者用のローカル画面だけで行います。
+
+グループはボディの名前ではなく3MF由来のIDを参照します。同名の部品も個別に選択でき、1つのボディは1つのグループに所属します。グループの削除で元のボディは削除しません。形状の結合・変形・移動は行わず、未登録のモデルに自動でグループを推測する機能もありません。
 
 ## 寸法付き図面
 

@@ -1,8 +1,30 @@
 {
   "schemaVersion": 1,
   "models": [
-    { "id": "figure-stand", "title": "人形立て", "config": "viewer.json" },
-    { "id": "pillar-decoration", "title": "柱装飾", "config": "models/pillar-decoration.json" },
-    { "id": "signage", "title": "サイネージ", "config": "models/signage.json" }
+    {
+      "id": "figure-stand",
+      "title": "人形立て",
+      "config": "viewer.json"
+    },
+    {
+      "id": "pillar-decoration",
+      "title": "柱装飾",
+      "config": "models/pillar-decoration.json"
+    },
+    {
+      "id": "signage",
+      "title": "サイネージ",
+      "config": "models/signage.json"
+    },
+    {
+      "id": "standing-desk-large",
+      "title": "立ち机 大",
+      "config": "models/standing-desk-large.json"
+    },
+    {
+      "id": "standing-desk-small",
+      "title": "立ち机 小",
+      "config": "models/standing-desk-small.json"
+    }
   ]
 }

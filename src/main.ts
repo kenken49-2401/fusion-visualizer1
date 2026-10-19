@@ -6,6 +6,7 @@ import { Appearance } from './appearance';
 import { ModelScene, type View } from './scene';
 import { mountDrawings } from './drawings';
 import { mountMeasurements } from './measurements';
+import { mountGroups } from './groups';
 import './style.css';
 
 mountShell(document.querySelector<HTMLElement>('#app')!);
@@ -95,6 +96,19 @@ async function start(): Promise<void> {
     el('status').textContent = `${visible} / ${loaded.bodies.length} ボディ表示 · ${loaded.triangles.toLocaleString('ja-JP')} ポリゴン`;
   };
   const duplicateNames = new Map<string, number>();
+  const groups = mountGroups(el('body-list').closest('section')!, loaded.bodies, () => {
+    for (const body of loaded.bodies) {
+      const row = [...el('body-list').querySelectorAll<HTMLElement>('[data-body-id]')].find(node => node.dataset.bodyId === body.id);
+      row?.classList.toggle('is-hidden', !body.object.visible);
+      row?.querySelector('.body-toggle')?.setAttribute('aria-pressed', String(body.object.visible));
+    }
+    setStatus(); scene.requestRender();
+  }, members => {
+    const bounds = new Box3(); members.forEach(body => bounds.union(new Box3().setFromObject(body.object)));
+    activeView(); scene.focus(bounds);
+    el('viewport').scrollIntoView({ block: 'center', behavior: 'smooth' });
+  });
+  groups.setGroups(config.groups ?? []);
   loaded.bodies.forEach(body => duplicateNames.set(body.name, (duplicateNames.get(body.name) || 0) + 1));
   for (const [index, body] of loaded.bodies.entries()) {
     const row = document.createElement('li'); row.className = 'body-row'; row.dataset.bodyId = body.id;
@@ -107,7 +121,7 @@ async function start(): Promise<void> {
     toggle.onclick = () => {
       body.object.visible = !body.object.visible;
       row.classList.toggle('is-hidden', !body.object.visible); toggle.setAttribute('aria-pressed', String(body.object.visible));
-      setStatus(); scene.requestRender();
+      setStatus(); groups.update(); scene.requestRender();
     };
     focus.onclick = () => {
       if (!body.object.visible) toggle.click();
@@ -141,7 +155,7 @@ async function start(): Promise<void> {
   // The editor and its save API exist only on the loopback development server in explicit admin mode.
   if (import.meta.env.DEV && __LOCAL_ADMIN__) {
     const { mountEditor } = await import('./admin');
-    mountEditor({ modelId: entry.id, config, bodies: loaded.bodies, appearance,
+    mountEditor({ modelId: entry.id, config, bodies: loaded.bodies, appearance, groupsChanged: groups.setGroups,
     focusBody: body => {
       if (!body.object.visible) el('body-list').querySelector<HTMLButtonElement>(`[data-body-id="${body.id}"] .body-toggle`)?.click();
       activeView(); scene.focus(new Box3().setFromObject(body.object));

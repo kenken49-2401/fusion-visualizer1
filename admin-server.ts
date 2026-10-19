@@ -1,15 +1,16 @@
 import { readFile, writeFile, rename, unlink, mkdir, realpath } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { resolve, relative, dirname } from 'node:path';
+import { resolve, relative, dirname, isAbsolute, sep } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Plugin } from 'vite';
-import { parseConfig, validateColors } from './src/config.ts';
-import { bakeColors } from './src/three-mf-colors.ts';
+import { parseConfig, validateColors, validateGroups, type BodyGroup } from './src/config.ts';
+import { bakeColors, readBodyIds } from './src/three-mf-colors.ts';
 
 const exec = promisify(execFile);
 const revisionOf = (config: string, model: Uint8Array) => createHash('sha256').update(config).update('\0').update(model).digest('hex');
+const isInside = (parent: string, target: string) => { const path = relative(parent, target); return Boolean(path) && !isAbsolute(path) && path !== '..' && !path.startsWith(`..${sep}`); };
 export type GitRunner = (args: string[]) => Promise<string>;
 
 /** This helper accepts fixed selected paths only; tests inject a disposable local Git runner. */
@@ -42,11 +43,11 @@ export function localAdmin(): Plugin {
         if (!entry || typeof entry.config !== 'string' || !/^[\w./-]+\.json$/.test(entry.config) || entry.config.split('/').includes('..')) throw new Error('モデルが見つかりません。');
         const publicRoot = await realpath(resolve(root, 'public'));
         const configPath = await realpath(resolve(publicRoot, entry.config));
-        if (!configPath.startsWith(`${publicRoot}/`)) throw new Error('設定のパスが不正です。');
+        if (!isInside(publicRoot, configPath)) throw new Error('設定のパスが不正です。');
         const source = await readFile(configPath, 'utf8');
         const config = parseConfig(JSON.parse(source));
         const modelPath = await realpath(resolve(publicRoot, config.model));
-        if (!modelPath.startsWith(`${publicRoot}/models/`)) throw new Error('モデルのパスが不正です。');
+        if (!isInside(resolve(publicRoot, 'models'), modelPath)) throw new Error('モデルのパスが不正です。');
         const model = await readFile(modelPath);
         return { source, config, model, configPath, modelPath, revision: revisionOf(source, model) };
       }
@@ -76,7 +77,7 @@ export function localAdmin(): Plugin {
           const chunks: Buffer[] = []; let length = 0;
           for await (const chunk of request) {
             const value = Buffer.from(chunk); length += value.byteLength;
-            if (length > 65536) return send(413, { error: '色設定が大きすぎます。' });
+            if (length > 1024 * 1024) return send(413, { error: '設定が大きすぎます。' });
             chunks.push(value);
           }
           let body;
@@ -91,15 +92,35 @@ export function localAdmin(): Plugin {
               return send(200, { ...result, revision: current.revision });
             } catch (error) { return send(500, { error: error instanceof Error && !('stderr' in error) ? error.message : 'GitHubへの同期に失敗しました。既存のGit認証と接続、ブランチを確認してください。' }); }
           }
-          let colors;
-          try { colors = validateColors(body.colors); } catch { return send(400, { error: '色設定の形式が不正です。' }); }
-          let model;
+          const hasColors = Object.hasOwn(body, 'colors');
+          const hasGroups = Object.hasOwn(body, 'groups');
+          if (!hasColors && !hasGroups) return send(400, { error: '保存する設定がありません。' });
+          let colors: Record<string, string> | undefined;
+          try { if (hasColors) colors = validateColors(body.colors); } catch { return send(400, { error: '色設定の形式が不正です。' }); }
+          let model: Uint8Array = current.model;
+          let groups: BodyGroup[];
           try {
             const snapshot = body.baseRevision ? snapshots.get(body.baseRevision) : { model: current.model, modelPath: current.modelPath };
             if (!snapshot || snapshot.modelPath !== current.modelPath) return send(409, { error: '読込時のモデルが見つかりません。再読み込みしてください。' });
-            model = bakeColors(snapshot.model, colors);
-          } catch { return send(400, { error: 'ボディの色を保存できません。モデルと色設定を確認してください。' }); }
-          const text = `${JSON.stringify({ ...current.config, colors: {}, updatedAt: new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' }) }, null, 2)}\n`;
+            if (colors) model = bakeColors(snapshot.model, colors);
+            // Group-only saves keep model bytes exactly intact. Color baking can clone shared
+            // resources, so translate body references by unchanged build/component traversal.
+            const sourceIds = readBodyIds(hasGroups ? snapshot.model : current.model);
+            const targetIds = readBodyIds(model);
+            groups = validateGroups(hasGroups ? body.groups : current.config.groups, sourceIds);
+            if (sourceIds.length !== targetIds.length) throw new Error('ボディの構成が変更されています。再読み込みしてください。');
+            const remap = new Map(sourceIds.map((id, index) => [id, targetIds[index]]));
+            groups = validateGroups(groups.map(group => ({ ...group, bodyIds: group.bodyIds.map(id => remap.get(id)!) })), targetIds);
+          } catch (error) { return send(400, { error: error instanceof Error ? error.message : 'ボディの設定を保存できません。' }); }
+          const text = `${JSON.stringify({ ...current.config, colors: hasColors ? {} : current.config.colors, groups, updatedAt: new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' }) }, null, 2)}\n`;
+          const configBackup = resolve(root, '.local/backups', `${current.revision}.json`);
+          await mkdir(dirname(configBackup), { recursive: true });
+          await writeFile(configBackup, current.source, { flag: 'wx' }).catch((error: NodeJS.ErrnoException) => { if (error.code !== 'EEXIST') throw error; });
+          if (!hasColors) {
+            const configTemp = `${current.configPath}.pending`; temporary.push(configTemp);
+            await writeFile(configTemp, text, { flag: 'wx' }); await rename(configTemp, current.configPath);
+            return send(200, { config: JSON.parse(text), revision: revisionOf(text, current.model) });
+          }
           const backup = resolve(root, '.local/backups', `${current.revision}.3mf`);
           await mkdir(dirname(backup), { recursive: true });
           await writeFile(backup, current.model, { flag: 'wx' }).catch((error: NodeJS.ErrnoException) => { if (error.code !== 'EEXIST') throw error; });

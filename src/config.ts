@@ -1,3 +1,28 @@
+export interface BodyGroup { id: string; name: string; bodyIds: string[] }
+
+export function validateGroups(value: unknown, knownBodyIds?: Iterable<string>): BodyGroup[] {
+  if (value === undefined) return [];
+  if (!Array.isArray(value) || value.length > 2000) throw new Error('グループ設定の形式が不正です。');
+  const known = knownBodyIds ? new Set(knownBodyIds) : undefined;
+  const ids = new Set<string>(), names = new Set<string>(), assigned = new Set<string>();
+  return value.map(raw => {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('グループの形式が不正です。');
+    const { id, name, bodyIds } = raw;
+    if (typeof id !== 'string' || !/^[\w:/.-]{1,180}$/.test(id) || id === '__proto__' || ids.has(id)) throw new Error('グループIDが不正または重複しています。');
+    if (typeof name !== 'string' || !name.trim() || name.trim().length > 160 || names.has(name.trim())) throw new Error('グループ名は重複しない1〜160文字で指定してください。');
+    if (!Array.isArray(bodyIds) || !bodyIds.length || bodyIds.length > 2000) throw new Error('グループにはボディを1つ以上選択してください。');
+    const members = bodyIds.map(bodyId => {
+      if (typeof bodyId !== 'string' || !/^[\w:/.-]{1,180}$/.test(bodyId) || bodyId === '__proto__' || assigned.has(bodyId)) throw new Error('1つのボディは1つのグループにだけ所属できます。');
+      if (known && !known.has(bodyId)) throw new Error('存在しないボディがグループに含まれています。再読み込みしてください。');
+      assigned.add(bodyId);
+      if (assigned.size > 2000) throw new Error('グループのボディ数が多すぎます。');
+      return bodyId;
+    });
+    ids.add(id); names.add(name.trim());
+    return { id, name: name.trim(), bodyIds: members };
+  });
+}
+
 export interface ViewerConfig {
   schemaVersion: 1;
   model: string;
@@ -7,6 +32,7 @@ export interface ViewerConfig {
   upAxis: 'Y' | 'Z';
   frontAxis: 'X' | 'Y';
   colors: Record<string, string>;
+  groups?: BodyGroup[];
 }
 
 export function validateColors(value: unknown): Record<string, string> {
@@ -35,7 +61,7 @@ export function parseConfig(value: unknown): ViewerConfig {
   if (c.frontAxis !== 'X' && c.frontAxis !== 'Y') throw new Error('正面方向は X または Y を指定してください。');
   if (typeof c.updatedAt !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(c.updatedAt)) throw new Error('更新日が不正です。');
   if (typeof c.description !== 'string' || c.description.length > 2000) throw new Error('モデルの説明が不正です。');
-  return { ...c, colors: validateColors(c.colors) } as ViewerConfig;
+  return { ...c, colors: validateColors(c.colors), groups: validateGroups(c.groups) } as ViewerConfig;
 }
 
 export interface ModelEntry { id: string; title: string; config: string }

@@ -38,6 +38,11 @@ export interface GuideStep {
     methods: string[];
     markers: FixingMarker[];
 }
+export interface BodyGroup {
+    id: string;
+    name: string;
+    bodyIds: string[];
+}
 export interface Guide {
     schemaVersion: 1;
     productId: string;
@@ -45,6 +50,7 @@ export interface Guide {
     summary: string;
     status: 'draft' | 'ready';
     materials: Supply[];
+    groups: BodyGroup[];
     steps: GuideStep[];
 }
 const icons = ['part', 'screw', 'tool', 'other'];
@@ -70,6 +76,40 @@ const vector = (v: unknown): [
 ]; };
 function unique(ids: string[], label: string) { if (new Set(ids).size !== ids.length)
     throw new Error(`${label}が重複しています。`); }
+export function parseGroups(value: unknown, knownBodies?: Iterable<string>): BodyGroup[] {
+    const bodies = knownBodies ? new Set(knownBodies) : undefined;
+    const assigned = new Set<string>();
+    const groupId = (value: unknown) => { const key = string(value, 180); if (!/^[\w:/.-]+$/.test(key) || key === '__proto__') throw new Error('グループの識別子が不正です。'); return key; };
+    let references = 0;
+    const groups = list(value === undefined ? [] : value, 2000).map(value => {
+        const group = object(value), name = typeof group.name === 'string' ? group.name.trim() : '';
+        if (!name || name.length > 160) throw new Error('グループの名前を入力してください。');
+        const bodyIds = list(group.bodyIds, 2000).map(groupId);
+        if (!bodyIds.length) throw new Error('グループには1つ以上の部品を選んでください。');
+        references += bodyIds.length;
+        if (references > 2000) throw new Error('グループの部品数が多すぎます。');
+        unique(bodyIds, 'グループ内の部品');
+        for (const body of bodyIds) {
+            if (bodies && !bodies.has(body)) throw new Error('グループにモデルに存在しない部品があります。');
+            if (assigned.has(body)) throw new Error('同じ部品を複数のグループに含めることはできません。');
+            assigned.add(body);
+        }
+        return { id: groupId(group.id), name, bodyIds };
+    });
+    unique(groups.map(group => group.id), 'グループID');
+    unique(groups.map(group => group.name), 'グループ名');
+    return groups;
+}
+/** Compute a shortcut without changing another step or the group's membership. */
+export function groupStepBodies(guide: Guide, index: number, groupId: string, operation: 'add' | 'remove'): { bodyIds: string[]; blockedBodyIds: string[] } {
+    const group = guide.groups.find(group => group.id === groupId), step = guide.steps[index];
+    if (!group || !step) throw new Error('グループまたはステップが見つかりません。');
+    const members = new Set(group.bodyIds);
+    const elsewhere = new Set(guide.steps.filter((_, i) => i !== index).flatMap(step => step.bodyIds));
+    const blockedBodyIds = group.bodyIds.filter(id => elsewhere.has(id));
+    const bodyIds = operation === 'remove' ? step.bodyIds.filter(id => !members.has(id)) : [...new Set([...step.bodyIds, ...group.bodyIds.filter(id => !elsewhere.has(id))])];
+    return { bodyIds, blockedBodyIds };
+}
 export function parseGuide(value: unknown, knownBodies?: Iterable<string>): Guide {
     const g = object(value);
     if (g.schemaVersion !== 1)
@@ -84,6 +124,7 @@ export function parseGuide(value: unknown, knownBodies?: Iterable<string>): Guid
     unique(materials.map(m => m.id), '物資ID');
     const supplies = new Set(materials.map(m => m.id));
     const assigned = new Set<string>(), bodies = knownBodies ? new Set(knownBodies) : undefined;
+    const groups = parseGroups(g.groups, bodies);
     const steps = list(g.steps, 200).map(v => {
         const s = object(v), bodyIds = list(s.bodyIds, 2000).map(id);
         unique(bodyIds, '同じステップの部品');
@@ -117,7 +158,7 @@ export function parseGuide(value: unknown, knownBodies?: Iterable<string>): Guid
         throw new Error('未配置の部品があります。確認済みにする前に全ての部品を手順に割り当ててください。');
     if (g.status === 'ready' && steps.some(s => !s.description.trim()))
         throw new Error('確認済みの手順には各ステップの説明が必要です。');
-    return { schemaVersion: 1, productId, title, summary: string(g.summary, 2000), status: g.status, materials, steps };
+    return { schemaVersion: 1, productId, title, summary: string(g.summary, 2000), status: g.status, materials, groups, steps };
 }
 export function stepBodies(guide: Guide, index: number) { const current = new Set(guide.steps[index]?.bodyIds ?? []); const visible = new Set(guide.steps.slice(0, index + 1).flatMap(s => s.bodyIds)); return { current, visible }; }
 export const newId = () => `id-${crypto.randomUUID()}`;

@@ -19,7 +19,7 @@ const initial = {
   'assembly-guide/public/catalog.json': 'guide catalog', 'assembly-guide/public/viewer.json': 'guide settings',
   'assembly-guide/public/models/stand.3mf': 'guide model', 'assembly-guide/public/guides/instructions.json': 'guide instructions',
 };
-const baseline = (files, commit) => ({ schemaVersion: 1, commit, files: Object.fromEntries(Object.entries(files).map(([path, data]) => [path, hash(data)])) });
+const baseline = (files, commit) => ({ schemaVersion: 1, dataMergeVersion: 1, commit, files: Object.fromEntries(Object.entries(files).map(([path, data]) => [path, hash(data)])) });
 async function put(root, path, content) { await mkdir(dirname(join(root, path)), { recursive: true }); await writeFile(join(root, path), content); }
 async function fixture(t, files = initial, state = true) {
   const root = await mkdtemp(join(tmpdir(), 'desktop-update-'));
@@ -42,6 +42,177 @@ function release(files, { commit = NEW, corrupt = false, manifestChanges = {}, s
 }
 const quiet = { onMessage() {} };
 const content = (root, path) => readFile(join(root, path), 'utf8');
+
+const json = value => `${JSON.stringify(value, null, 2)}\n`;
+function modelData(ids) {
+  const files = { ...initial };
+  for (const prefix of ['public/', 'assembly-guide/public/']) {
+    files[`${prefix}catalog.json`] = json({ schemaVersion: 1, models: ids.map(id => ({ id, title: id, config: `models/${id}.json` })) });
+    for (const id of ids) {
+      files[`${prefix}models/${id}.json`] = json({ schemaVersion: 1, model: `models/${id}.3mf`, title: id, description: '', updatedAt: '2026-10-19', upAxis: 'Z', frontAxis: 'Y', colors: {} });
+      files[`${prefix}models/${id}.3mf`] = `original ${id} model`;
+      if (prefix.startsWith('assembly-guide')) files[`${prefix}guides/${id}.json`] = json({ schemaVersion: 1, productId: id, title: id, steps: [] });
+    }
+  }
+  return files;
+}
+
+test('adds two complete new models to both edited bundles without replacing user data or catalog edits', async t => {
+  const old = modelData(['stand']);
+  const root = await fixture(t, old);
+  const incoming = modelData(['stand', 'new-one', 'new-two']);
+  incoming['src/app.mjs'] = 'new code';
+  const localCatalogs = {};
+  for (const prefix of ['public/', 'assembly-guide/public/']) {
+    const catalog = JSON.parse(old[`${prefix}catalog.json`]);
+    catalog.customNote = 'keep this local metadata'; catalog.models[0].title = 'My renamed stand';
+    catalog.models.push({ id: 'personal', title: 'User model', config: 'models/personal.json', customEntry: true });
+    localCatalogs[prefix] = catalog;
+    await put(root, `${prefix}catalog.json`, json(catalog));
+    await put(root, `${prefix}models/personal.json`, json({ ...JSON.parse(old[`${prefix}models/stand.json`]), model: 'models/personal.3mf' }));
+    await put(root, `${prefix}models/personal.3mf`, 'personal bytes');
+    await put(root, `${prefix}models/stand.3mf`, 'my saved stand colors');
+  }
+  await put(root, 'assembly-guide/public/guides/stand.json', 'my hand-edited instructions');
+  await put(root, 'assembly-guide/public/guides/personal.json', 'my personal guide');
+  assert.equal((await updateDesktop(root, { ...quiet, ...release(incoming) })).status, 'updated');
+  const state = JSON.parse(await content(root, STATE));
+  for (const prefix of ['public/', 'assembly-guide/public/']) {
+    const merged = JSON.parse(await content(root, `${prefix}catalog.json`));
+    assert.deepEqual(merged, { ...localCatalogs[prefix], models: [...localCatalogs[prefix].models, ...JSON.parse(incoming[`${prefix}catalog.json`]).models.slice(1)] });
+    assert.equal(await content(root, `${prefix}models/stand.3mf`), 'my saved stand colors');
+    assert.equal(await content(root, `${prefix}models/stand.json`), old[`${prefix}models/stand.json`]);
+    assert.equal(await content(root, `${prefix}models/personal.3mf`), 'personal bytes');
+    assert.equal(state.files[`${prefix}models/stand.3mf`], hash(old[`${prefix}models/stand.3mf`]));
+    assert.equal(state.files[`${prefix}catalog.json`], hash(incoming[`${prefix}catalog.json`]));
+    for (const id of ['new-one', 'new-two']) {
+      for (const suffix of [`models/${id}.json`, `models/${id}.3mf`, ...(prefix.startsWith('assembly-guide') ? [`guides/${id}.json`] : [])]) {
+        assert.equal(await content(root, prefix + suffix), incoming[prefix + suffix]);
+        assert.equal(state.files[prefix + suffix], hash(incoming[prefix + suffix]));
+      }
+    }
+  }
+  assert.equal(await content(root, 'assembly-guide/public/guides/stand.json'), 'my hand-edited instructions');
+  assert.equal(await content(root, 'assembly-guide/public/guides/personal.json'), 'my personal guide');
+  // On a subsequent release, a deliberately removed previously shipped entry stays removed.
+  const catalogPath = 'public/catalog.json';
+  const merged = JSON.parse(await content(root, catalogPath));
+  merged.models = merged.models.filter(entry => entry.id !== 'new-one');
+  await put(root, catalogPath, json(merged));
+  await rm(join(root, 'public/models/new-one.json')); await rm(join(root, 'public/models/new-one.3mf'));
+  assert.equal((await updateDesktop(root, { ...quiet, ...release(incoming, { commit: 'c'.repeat(40) }) })).status, 'updated');
+  assert.deepEqual(JSON.parse(await content(root, catalogPath)), merged);
+  await assert.rejects(lstat(join(root, 'public/models/new-one.3mf')), { code: 'ENOENT' });
+});
+
+test('skips deleted old entries, local ID/config/file aliases and incomplete guide pairs', async t => {
+  const old = modelData(['stand', 'retired']);
+  const root = await fixture(t, old);
+  const incoming = modelData(['stand', 'retired', 'new-one', 'new-two', 'new-three', 'new-four']);
+  delete incoming['assembly-guide/public/guides/new-four.json'];
+  for (const prefix of ['public/', 'assembly-guide/public/']) {
+    const catalog = JSON.parse(old[`${prefix}catalog.json`]);
+    catalog.models = [catalog.models[0],
+      { id: 'new-one', title: 'User-owned ID', config: 'models/personal.json' },
+      { id: 'personal-two', title: 'User-owned config path', config: 'models/new-two.json' }];
+    for (const filename of ['personal', 'new-two']) await put(root, `${prefix}models/${filename}.json`, old[`${prefix}models/stand.json`]);
+    await put(root, `${prefix}catalog.json`, json(catalog));
+    await rm(join(root, `${prefix}models/retired.json`)); await rm(join(root, `${prefix}models/retired.3mf`));
+    await put(root, `${prefix}models/NEW-THREE.3mf`, 'user case alias');
+  }
+  assert.equal((await updateDesktop(root, { ...quiet, ...release(incoming) })).status, 'updated');
+  for (const prefix of ['public/', 'assembly-guide/public/']) {
+    const catalog = JSON.parse(await content(root, `${prefix}catalog.json`));
+    assert.deepEqual(catalog.models.map(e => e.id), ['stand', 'new-one', 'personal-two', ...(prefix === 'public/' ? ['new-four'] : [])]);
+    for (const id of ['retired', 'new-one', 'new-two', 'new-three']) await assert.rejects(lstat(join(root, `${prefix}models/${id}.3mf`)), { code: 'ENOENT' });
+    assert.equal(await content(root, `${prefix}models/NEW-THREE.3mf`), 'user case alias');
+  }
+});
+
+test('an edited child guide alone retains its existing paired model while new release models arrive', async t => {
+  const old = modelData(['stand']); const root = await fixture(t, old);
+  const guidePath = 'assembly-guide/public/guides/stand.json';
+  await put(root, guidePath, 'my guide edits');
+  const incoming = modelData(['stand', 'new-one', 'new-two']);
+  incoming['assembly-guide/public/models/stand.3mf'] = 'upstream revised old model';
+  incoming[guidePath] = 'upstream revised old guide';
+  assert.equal((await updateDesktop(root, { ...quiet, ...release(incoming) })).status, 'updated');
+  assert.equal(await content(root, guidePath), 'my guide edits');
+  assert.equal(await content(root, 'assembly-guide/public/models/stand.3mf'), old['assembly-guide/public/models/stand.3mf']);
+  assert.deepEqual(JSON.parse(await content(root, 'assembly-guide/public/catalog.json')).models.map(e => e.id), ['stand', 'new-one', 'new-two']);
+  for (const id of ['new-one', 'new-two']) {
+    for (const file of [`models/${id}.json`, `models/${id}.3mf`, `guides/${id}.json`]) assert.equal(await content(root, `assembly-guide/public/${file}`), incoming[`assembly-guide/public/${file}`]);
+  }
+});
+
+test('reconciles the same release once after the shipped old updater withheld new models', async t => {
+  // The previous updater already installed the release's code and commit, but
+  // retained the old data baselines and omitted all newly shipped model paths.
+  const old = modelData(['stand']); old['src/app.mjs'] = 'already updated code';
+  const root = await fixture(t, old);
+  const oldPolicyState = baseline(old, NEW); delete oldPolicyState.dataMergeVersion;
+  await put(root, STATE, json(oldPolicyState));
+  await put(root, 'public/models/stand.3mf', 'my saved colors');
+  await put(root, 'assembly-guide/public/guides/stand.json', 'my guide edits');
+  const incoming = modelData(['stand', 'new-one', 'new-two']); incoming['src/app.mjs'] = old['src/app.mjs'];
+  const remote = release(incoming);
+  assert.equal((await updateDesktop(root, { ...quiet, ...remote })).status, 'updated');
+  for (const prefix of ['public/', 'assembly-guide/public/']) {
+    assert.deepEqual(JSON.parse(await content(root, `${prefix}catalog.json`)).models.map(entry => entry.id), ['stand', 'new-one', 'new-two']);
+    for (const id of ['new-one', 'new-two']) {
+      for (const file of [`models/${id}.json`, `models/${id}.3mf`, ...(prefix.startsWith('assembly-guide') ? [`guides/${id}.json`] : [])]) assert.equal(await content(root, prefix + file), incoming[prefix + file]);
+    }
+  }
+  assert.equal(await content(root, 'public/models/stand.3mf'), 'my saved colors');
+  assert.equal(await content(root, 'assembly-guide/public/guides/stand.json'), 'my guide edits');
+  assert.equal(await content(root, 'assembly-guide/public/models/stand.3mf'), old['assembly-guide/public/models/stand.3mf']);
+  assert.equal(JSON.parse(await content(root, STATE)).dataMergeVersion, 1);
+  assert.equal(remote.calls.length, 2);
+  assert.equal((await updateDesktop(root, { ...quiet, ...remote })).status, 'current');
+  assert.equal(remote.calls.length, 3); // Only the manifest is fetched on subsequent launches.
+});
+
+test('conservatively preserves catalogs with unsafe or invalid local/incoming references', async t => {
+  for (const variant of ['local-config', 'external', 'traversal', 'bad-schema']) {
+    const old = modelData(['stand']); const root = await fixture(t, old);
+    const incoming = modelData(['stand', 'new-one']);
+    const catalogPath = 'public/catalog.json';
+    if (variant === 'local-config') await put(root, 'public/models/stand.json', json({ schemaVersion: 1, model: '../outside.3mf' }));
+    else {
+      const catalog = JSON.parse(incoming[catalogPath]);
+      if (variant === 'external') catalog.models[1].config = 'https://example.com/new-one.json';
+      if (variant === 'traversal') incoming['public/models/new-one.json'] = json({ ...JSON.parse(incoming['public/models/new-one.json']), model: 'models/../outside.3mf' });
+      if (variant === 'bad-schema') catalog.schemaVersion = 2;
+      incoming[catalogPath] = json(catalog);
+      await put(root, 'public/models/stand.3mf', 'my edited colors');
+    }
+    assert.equal((await updateDesktop(root, { ...quiet, ...release(incoming) })).status, 'updated');
+    assert.equal(await content(root, catalogPath), old[catalogPath]);
+    await assert.rejects(lstat(join(root, 'public/models/new-one.json')), { code: 'ENOENT' });
+    assert.equal(JSON.parse(await content(root, STATE)).files['public/models/new-one.json'], undefined);
+  }
+});
+
+test('rolls back additive model files, catalog and baseline together after a catalog write fails', { skip: process.platform === 'win32' || process.getuid?.() === 0 }, async t => {
+  const old = modelData(['stand']); const root = await fixture(t, old);
+  await put(root, 'public/models/stand.3mf', 'local stand colors');
+  const originalState = await content(root, STATE);
+  const incoming = modelData(['stand', 'new-one', 'new-two']); incoming['src/app.mjs'] = 'new app';
+  await chmod(join(root, 'public'), 0o500);
+  try {
+    assert.equal((await updateDesktop(root, { ...quiet, ...release(incoming) })).status, 'skipped');
+    assert.equal(await content(root, 'src/app.mjs'), old['src/app.mjs']);
+    assert.equal(await content(root, 'public/models/stand.3mf'), 'local stand colors');
+    assert.equal(await content(root, 'public/catalog.json'), old['public/catalog.json']);
+    assert.equal(await content(root, STATE), originalState);
+    for (const prefix of ['public/', 'assembly-guide/public/']) for (const id of ['new-one', 'new-two']) {
+      for (const suffix of ['json', '3mf']) await assert.rejects(lstat(join(root, `${prefix}models/${id}.${suffix}`)), { code: 'ENOENT' });
+    }
+    const transactions = await readdir(join(root, '.local/updater/backups'));
+    const journal = JSON.parse(await content(root, `.local/updater/backups/${transactions[0]}/journal.json`));
+    assert.equal(journal.status, 'rolled-back'); assert.equal(journal.files.at(-1).path, STATE);
+  } finally { await chmod(join(root, 'public'), 0o700); }
+});
 
 test('updates code, additions and removals, verifies backups, writes state last and then reports current', async t => {
   const root = await fixture(t, { ...initial, 'src/obsolete.mjs': 'remove me' });
