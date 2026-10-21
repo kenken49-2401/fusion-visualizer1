@@ -85,3 +85,31 @@ describe('named body groups', () => {
         expect(parseGuide(guide, bodies).steps.map(step => step.bodyIds)).toEqual(assigned);
     });
 });
+
+
+describe('supply-to-body image mappings', () => {
+    it('keeps legacy supplies unmapped without guessing from names or material IDs', () => {
+        const raw = sample();
+        for (const material of raw.materials) delete material.bodyId;
+        const guide = parseGuide(raw);
+        expect(guide.materials.every(material => material.bodyId === undefined)).toBe(true);
+        expect(guide.materials[0].name).toBe(raw.materials[0].name);
+        expect(JSON.parse(JSON.stringify(guide)).materials[0]).not.toHaveProperty('bodyId');
+    });
+    it('preserves explicit stable IDs through parsing and JSON round trips using a one-shot known-body iterable', () => {
+        const raw = sample(), ids = raw.steps.flatMap((step: { bodyIds: string[] }) => step.bodyIds) as string[];
+        raw.materials[0].bodyId = ids[0];
+        function* knownBodies() { yield* ids; }
+        const parsed = parseGuide(raw, knownBodies());
+        expect(parsed.materials[0].bodyId).toBe(ids[0]);
+        expect(parseGuide(JSON.parse(JSON.stringify(parsed)), ids)).toEqual(parsed);
+        expect(parsed.steps).toEqual(parseGuide(raw).steps);
+    });
+    it('rejects malformed and unknown mapped body IDs before saving', () => {
+        for (const bodyId of [null, '', 123, '../../outside', 'invalid body', 'build:999/object:missing']) {
+            const raw = sample(), ids = raw.steps.flatMap((step: { bodyIds: string[] }) => step.bodyIds) as string[];
+            raw.materials[0].bodyId = bodyId;
+            expect(() => parseGuide(raw, ids)).toThrow();
+        }
+    });
+});

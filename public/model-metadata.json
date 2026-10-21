@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "models": {
+    "models/figure-stand.3mf": {
+      "sha256": "ae906ce5e77202953ba0b25ffa87e5c6a6bfe299774823513cc994db8d7472c1",
+      "uploadedAt": "2026-10-16T15:58:15.000Z",
+      "commit": "0af728a3b2f787c12c44f40bd2bc5716c9414f72"
+    },
+    "models/pillar-decoration.3mf": {
+      "sha256": "33aed1079b9c4f4999f77139dacc620a14e93e741f82c27dfd818a55f3dedfb4",
+      "uploadedAt": "2026-10-16T16:38:58.000Z",
+      "commit": "61f959aed81054696f3c019ab6f697042d7a065f"
+    },
+    "models/signage.3mf": {
+      "sha256": "16653f6e665f4458073e4e86a1c23fbad2249378fb45432fbee1350acef40590",
+      "uploadedAt": "2026-10-16T16:38:58.000Z",
+      "commit": "61f959aed81054696f3c019ab6f697042d7a065f"
+    },
+    "models/standing-desk-large.3mf": {
+      "sha256": "819f6f80b2dd821e64b91604044ff49411d5e01696a4ecd466867fa90c9a1639",
+      "uploadedAt": "2026-10-19T13:28:40.000Z",
+      "commit": "fccc0ecb5c203c05ee4447be62fc0151e544cefc"
+    },
+    "models/standing-desk-small.3mf": {
+      "sha256": "a854f399ed372d4ec4420ac102cfd0fc5b9e120250ebf9fd5239c73f466918a1",
+      "uploadedAt": "2026-10-19T13:28:40.000Z",
+      "commit": "fccc0ecb5c203c05ee4447be62fc0151e544cefc"
+    }
+  }
+}

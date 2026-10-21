@@ -1,4 +1,5 @@
 import type { LoadedModel } from './model-loader';
+import { bodyThumbnail } from './body-icons';
 import { groupStepBodies, newId, parseGroups, type Guide } from './schema';
 
 const node = <K extends keyof HTMLElementTagNameMap>(tag: K, text?: string) => {
@@ -9,20 +10,21 @@ const node = <K extends keyof HTMLElementTagNameMap>(tag: K, text?: string) => {
 function action(host: HTMLElement, text: string, click: () => void) {
     const button = node('button', text); button.type = 'button'; button.onclick = click; host.append(button); return button;
 }
-function members(host: HTMLElement, model: LoadedModel, names: Map<string, string>, selected: Set<string>, ownership: (id: string) => string | undefined, labelFor: (name: string) => string, change: (id: string, checked: boolean) => void) {
+function members(host: HTMLElement, model: LoadedModel, names: Map<string, string>, thumbnails: ReadonlyMap<string, string>, selected: Set<string>, ownership: (id: string) => string | undefined, labelFor: (name: string) => string, change: (id: string, checked: boolean) => void) {
     const list = node('div'); list.className = 'editor-body-list'; host.append(list);
     for (const body of model.bodies) {
         const owner = ownership(body.id), label = node('label'), check = node('input');
         check.type = 'checkbox'; check.value = body.id; check.checked = selected.has(body.id); check.disabled = owner !== undefined;
         check.setAttribute('aria-label', labelFor(names.get(body.id)!));
         check.onchange = () => change(body.id, check.checked);
-        label.append(check, document.createTextNode(`${names.get(body.id)}${owner ? `（${owner}に所属）` : ''}`)); list.append(label);
+        label.append(check, bodyThumbnail(body.id, names.get(body.id)!, thumbnails), document.createTextNode(`${names.get(body.id)}${owner ? `（${owner}に所属）` : ''}`)); list.append(label);
     }
 }
 
-export function createGroupEditor({ getGuide, model, onChange, notify }: {
+export function createGroupEditor({ getGuide, model, thumbnails, onChange, notify }: {
     getGuide: () => Guide;
     model: LoadedModel;
+    thumbnails: ReadonlyMap<string, string>;
     onChange: (render: boolean) => void;
     notify: (message: string) => void;
 }) {
@@ -49,7 +51,7 @@ export function createGroupEditor({ getGuide, model, onChange, notify }: {
             name.oninput = refreshName;
             name.onchange = () => { name.value = name.value.trim(); refreshName(); };
             label.append(name); row.append(label);
-            members(row, model, names, new Set(group.bodyIds), id => guide.groups.find(other => other.id !== group.id && other.bodyIds.includes(id))?.name, name => `${name}を${group.name}に含める`, (id, checked) => {
+            members(row, model, names, thumbnails, new Set(group.bodyIds), id => guide.groups.find(other => other.id !== group.id && other.bodyIds.includes(id))?.name, name => `${name}を${group.name}に含める`, (id, checked) => {
                 if (!checked && group.bodyIds.length === 1) { notify('グループには1つ以上の部品が必要です。まとまりをなくす場合はグループを削除してください。'); onChange(true); return; }
                 group.bodyIds = checked ? [...group.bodyIds, id] : group.bodyIds.filter(member => member !== id);
                 newMembers.delete(id); onChange(true);
@@ -62,7 +64,7 @@ export function createGroupEditor({ getGuide, model, onChange, notify }: {
         name.value = newName; name.maxLength = 160; name.setAttribute('aria-label', '新しいグループの名前'); label.append(name); creation.append(label);
         const owner = (id: string) => guide.groups.find(group => group.bodyIds.includes(id))?.name;
         for (const id of newMembers) if (owner(id) !== undefined || !knownBodies.includes(id)) newMembers.delete(id);
-        members(creation, model, names, newMembers, owner, name => `${name}を新しいグループに含める`, (id, checked) => { if (checked) newMembers.add(id); else newMembers.delete(id); refreshCreation(); });
+        members(creation, model, names, thumbnails, newMembers, owner, name => `${name}を新しいグループに含める`, (id, checked) => { if (checked) newMembers.add(id); else newMembers.delete(id); refreshCreation(); });
         const create = action(creation, 'グループを作成', () => {
             try { guide.groups = parseGroups([...guide.groups, { id: newId(), name: newName, bodyIds: [...newMembers] }], knownBodies); }
             catch (error) { notify(error instanceof Error ? error.message : 'グループを確認してください。'); return; }

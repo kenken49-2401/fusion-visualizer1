@@ -7,6 +7,7 @@
   "materials": [
     {
       "id": "part-1",
+      "bodyId": "build:0/object:1",
       "name": "1. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -15,6 +16,7 @@
     },
     {
       "id": "part-2",
+      "bodyId": "build:1/object:3",
       "name": "2. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -23,6 +25,7 @@
     },
     {
       "id": "part-3",
+      "bodyId": "build:2/object:5",
       "name": "3. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -31,6 +34,7 @@
     },
     {
       "id": "part-4",
+      "bodyId": "build:3/object:7",
       "name": "4. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -39,6 +43,7 @@
     },
     {
       "id": "part-5",
+      "bodyId": "build:4/object:9",
       "name": "5. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -47,6 +52,7 @@
     },
     {
       "id": "part-6",
+      "bodyId": "build:5/object:11",
       "name": "6. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -55,6 +61,7 @@
     },
     {
       "id": "part-7",
+      "bodyId": "build:6/object:13",
       "name": "7. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -63,6 +70,7 @@
     },
     {
       "id": "part-8",
+      "bodyId": "build:7/object:15",
       "name": "8. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -71,6 +79,7 @@
     },
     {
       "id": "part-9",
+      "bodyId": "build:8/object:17",
       "name": "9. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -79,6 +88,7 @@
     },
     {
       "id": "part-10",
+      "bodyId": "build:9/object:19",
       "name": "10. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -87,6 +97,7 @@
     },
     {
       "id": "part-11",
+      "bodyId": "build:10/object:21",
       "name": "11. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -95,6 +106,7 @@
     },
     {
       "id": "part-12",
+      "bodyId": "build:11/object:23",
       "name": "12. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -103,6 +115,7 @@
     },
     {
       "id": "part-13",
+      "bodyId": "build:12/object:25",
       "name": "13. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -111,6 +124,7 @@
     },
     {
       "id": "part-14",
+      "bodyId": "build:13/object:27",
       "name": "14. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -119,6 +133,7 @@
     },
     {
       "id": "part-15",
+      "bodyId": "build:14/object:29",
       "name": "15. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -127,6 +142,7 @@
     },
     {
       "id": "part-16",
+      "bodyId": "build:15/object:31",
       "name": "16. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -135,6 +151,7 @@
     },
     {
       "id": "part-17",
+      "bodyId": "build:16/object:33",
       "name": "17. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -143,6 +160,7 @@
     },
     {
       "id": "part-18",
+      "bodyId": "build:17/object:35",
       "name": "18. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -151,6 +169,7 @@
     },
     {
       "id": "part-19",
+      "bodyId": "build:18/object:37",
       "name": "19. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -159,6 +178,7 @@
     },
     {
       "id": "part-20",
+      "bodyId": "build:19/object:39",
       "name": "20. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -167,6 +187,7 @@
     },
     {
       "id": "part-21",
+      "bodyId": "build:20/object:41",
       "name": "21. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -175,6 +196,7 @@
     },
     {
       "id": "part-22",
+      "bodyId": "build:21/object:43",
       "name": "22. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -183,6 +205,7 @@
     },
     {
       "id": "part-23",
+      "bodyId": "build:22/object:45",
       "name": "23. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -191,6 +214,7 @@
     },
     {
       "id": "part-24",
+      "bodyId": "build:23/object:47",
       "name": "24. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -199,6 +223,7 @@
     },
     {
       "id": "part-25",
+      "bodyId": "build:24/object:49",
       "name": "25. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -207,6 +232,7 @@
     },
     {
       "id": "part-26",
+      "bodyId": "build:25/object:51",
       "name": "26. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -215,6 +241,7 @@
     },
     {
       "id": "part-27",
+      "bodyId": "build:26/object:53",
       "name": "27. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -223,6 +250,7 @@
     },
     {
       "id": "part-28",
+      "bodyId": "build:27/object:55",
       "name": "28. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -231,6 +259,7 @@
     },
     {
       "id": "part-29",
+      "bodyId": "build:28/object:57",
       "name": "29. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -239,6 +268,7 @@
     },
     {
       "id": "part-30",
+      "bodyId": "build:29/object:59",
       "name": "30. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -247,6 +277,7 @@
     },
     {
       "id": "part-31",
+      "bodyId": "build:30/object:61",
       "name": "31. ボディ1",
       "quantity": "1",
       "unit": "点",

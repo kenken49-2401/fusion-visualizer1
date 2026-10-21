@@ -73,3 +73,19 @@ test('real touch taps measure, while pinch and canceled touch gestures do not', 
   await expect(page.locator('.measurement-list')).toContainText('1,027.57 mm');
   await client.detach();
 });
+
+test('tapping model geometry selects it while drags and measurement taps keep their own behavior', async ({ page }) => {
+  await page.goto('/?model=figure-stand');
+  await expect(page.locator('#viewport')).toHaveAttribute('data-ready', 'true');
+  let [a] = await frontPoints(page);
+  await page.mouse.click(a.x, a.y);
+  await expect(page.locator('#viewport')).toHaveAttribute('data-selected-body', 'build:0/object:1');
+  await page.getByRole('button', { name: '選択を解除', exact: true }).click();
+  [a] = await frontPoints(page);
+  await page.mouse.move(a.x, a.y); await page.mouse.down(); await page.mouse.move(a.x + 40, a.y + 20, { steps: 5 }); await page.mouse.up();
+  await expect(page.locator('#viewport')).not.toHaveAttribute('data-selected-body');
+  await page.locator('.measurement-toggle').click();
+  [a] = await frontPoints(page); await page.mouse.click(a.x, a.y);
+  await expect(page.locator('.measurement-label.is-pending')).toBeVisible();
+  await expect(page.locator('#viewport')).not.toHaveAttribute('data-selected-body');
+});

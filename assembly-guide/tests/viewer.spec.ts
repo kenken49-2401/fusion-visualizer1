@@ -86,3 +86,35 @@ test('public guide groups focus only already visible parts and retain the curren
     await expect(page.locator('#viewport')).toHaveAttribute('data-new-bodies', '1');
     await expect(page.getByRole('button', { name: 'グループを作成', exact: true })).toHaveCount(0);
 });
+
+test('body thumbnails highlight a part; visibility overrides reset without changing step assignments', async ({ page, request }) => {
+    const record = await (await request.get('/model-metadata.json')).json();
+    await page.goto('/?product=pillar-decoration');
+    await expect(page.locator('#viewport')).toHaveAttribute('data-ready', 'true');
+    await expect(page.locator('#guide-body-list img')).toHaveCount(4);
+    const first = page.locator('.guide-body-row').first(), second = page.locator('.guide-body-row').nth(1);
+    const firstId = await first.getAttribute('data-body-id'), secondId = await second.getAttribute('data-body-id');
+    await first.locator('.guide-body-select').click();
+    await expect(page.locator('#viewport')).toHaveAttribute('data-selected-body', firstId!);
+    await expect(first).toHaveAttribute('data-selected', 'true');
+    await first.locator('.guide-body-visibility').click();
+    await expect(page.locator('#viewport')).toHaveAttribute('data-visible-bodies', '0');
+    await second.locator('.guide-body-visibility').click();
+    await expect(page.locator('#viewport')).toHaveAttribute('data-visible-bodies', '1');
+    await expect(second).toHaveAttribute('data-manual', 'true');
+    await page.getByRole('button', { name: '表示を手順に戻す', exact: true }).click();
+    await expect(page.locator('#viewport')).toHaveAttribute('data-visible-bodies', '1');
+    await expect(first).toHaveAttribute('data-visible', 'true');
+    await expect(second).toHaveAttribute('data-visible', 'false');
+    const part = page.locator('#all-materials .supply-body-select').first();
+    await part.scrollIntoViewIfNeeded();
+    await expect(part.locator('img')).toHaveJSProperty('naturalWidth', 128);
+    await part.click();
+    await expect(page.locator('#viewport')).toHaveAttribute('data-selected-body', firstId!);
+    await page.getByRole('button', { name: '次のステップを3Dで表示', exact: true }).click();
+    await expect(page.locator('#viewport')).toHaveAttribute('data-visible-bodies', '2');
+    await expect(page.locator('#viewport')).toHaveAttribute('data-manual-visibility', '0');
+    await expect(page.locator('#viewport')).not.toHaveAttribute('data-selected-body');
+    await expect(page.locator('#model-uploaded time')).toHaveAttribute('datetime', record.models['models/pillar-decoration.3mf'].uploadedAt);
+    expect(secondId).not.toBe(firstId);
+});

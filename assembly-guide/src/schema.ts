@@ -6,6 +6,7 @@ export interface Supply {
     quantity: string;
     unit: string;
     icon: IconKind;
+    bodyId?: string;
     note: string;
 }
 export interface Requirement {
@@ -119,11 +120,17 @@ export function parseGuide(value: unknown, knownBodies?: Iterable<string>): Guid
         throw new Error('制作物の識別子が不正です。');
     if (g.status !== 'draft' && g.status !== 'ready')
         throw new Error('手順の状態が不正です。');
-    const materials = list(g.materials, 300).map(v => { const m = object(v); if (!icons.includes(String(m.icon)))
-        throw new Error('物資のアイコンが不正です。'); return { id: id(m.id), name: string(m.name, 160), quantity: string(m.quantity, 80), unit: string(m.unit, 30), icon: m.icon as IconKind, note: string(m.note, 1000) }; });
+    const bodies = knownBodies ? new Set(knownBodies) : undefined;
+    const materials = list(g.materials, 300).map(v => {
+        const m = object(v);
+        if (!icons.includes(String(m.icon))) throw new Error('物資のアイコンが不正です。');
+        const bodyId = m.bodyId === undefined ? undefined : id(m.bodyId);
+        if (bodyId !== undefined && bodies && !bodies.has(bodyId)) throw new Error('物資にモデルに存在しない部品が指定されています。');
+        return { id: id(m.id), name: string(m.name, 160), quantity: string(m.quantity, 80), unit: string(m.unit, 30), icon: m.icon as IconKind, note: string(m.note, 1000), ...(bodyId === undefined ? {} : { bodyId }) };
+    });
     unique(materials.map(m => m.id), '物資ID');
     const supplies = new Set(materials.map(m => m.id));
-    const assigned = new Set<string>(), bodies = knownBodies ? new Set(knownBodies) : undefined;
+    const assigned = new Set<string>();
     const groups = parseGroups(g.groups, bodies);
     const steps = list(g.steps, 200).map(v => {
         const s = object(v), bodyIds = list(s.bodyIds, 2000).map(id);

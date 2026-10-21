@@ -7,6 +7,7 @@
   "materials": [
     {
       "id": "part-1",
+      "bodyId": "build:0/object:1",
       "name": "1. ボディ1",
       "quantity": "1",
       "unit": "点",
@@ -15,6 +16,7 @@
     },
     {
       "id": "part-2",
+      "bodyId": "build:1/object:3",
       "name": "2. ボディ10",
       "quantity": "1",
       "unit": "点",
@@ -23,6 +25,7 @@
     },
     {
       "id": "part-3",
+      "bodyId": "build:2/object:5",
       "name": "3. ボディ11",
       "quantity": "1",
       "unit": "点",
@@ -31,6 +34,7 @@
     },
     {
       "id": "part-4",
+      "bodyId": "build:3/object:7",
       "name": "4. ボディ12",
       "quantity": "1",
       "unit": "点",
@@ -39,6 +43,7 @@
     },
     {
       "id": "part-5",
+      "bodyId": "build:4/object:9",
       "name": "5. ボディ13",
       "quantity": "1",
       "unit": "点",
@@ -47,6 +52,7 @@
     },
     {
       "id": "part-6",
+      "bodyId": "build:5/object:11",
       "name": "6. ボディ2",
       "quantity": "1",
       "unit": "点",
@@ -55,6 +61,7 @@
     },
     {
       "id": "part-7",
+      "bodyId": "build:6/object:13",
       "name": "7. ボディ3",
       "quantity": "1",
       "unit": "点",
@@ -63,6 +70,7 @@
     },
     {
       "id": "part-8",
+      "bodyId": "build:7/object:15",
       "name": "8. ボディ4",
       "quantity": "1",
       "unit": "点",
@@ -71,6 +79,7 @@
     },
     {
       "id": "part-9",
+      "bodyId": "build:8/object:17",
       "name": "9. ボディ5",
       "quantity": "1",
       "unit": "点",
@@ -79,6 +88,7 @@
     },
     {
       "id": "part-10",
+      "bodyId": "build:9/object:19",
       "name": "10. ボディ6",
       "quantity": "1",
       "unit": "点",
@@ -87,6 +97,7 @@
     },
     {
       "id": "part-11",
+      "bodyId": "build:10/object:21",
       "name": "11. ボディ7",
       "quantity": "1",
       "unit": "点",
@@ -95,6 +106,7 @@
     },
     {
       "id": "part-12",
+      "bodyId": "build:11/object:23",
       "name": "12. ボディ8",
       "quantity": "1",
       "unit": "点",
@@ -103,6 +115,7 @@
     },
     {
       "id": "part-13",
+      "bodyId": "build:12/object:25",
       "name": "13. ボディ9",
       "quantity": "1",
       "unit": "点",

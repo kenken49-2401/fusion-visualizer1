@@ -2,10 +2,12 @@ import { Matrix3, Raycaster, Vector2, Vector3 } from 'three';
 import type { LoadedModel } from './model-loader';
 import type { ModelScene } from './scene';
 import { createGroupEditor, renderGroupShortcuts } from './editor-groups';
+import { bodyThumbnail } from './body-icons';
 import { newId, parseGuide, type Guide, type GuideStep, type IconKind, type MarkerKind } from './schema';
 interface Context {
     guide: Guide;
     model: LoadedModel;
+    thumbnails: ReadonlyMap<string, string>;
     scene: ModelScene;
     host: HTMLElement;
     getIndex: () => number;
@@ -16,7 +18,7 @@ const el = <K extends keyof HTMLElementTagNameMap>(tag: K, text?: string) => { c
     n.textContent = text; return n; };
 const lines = (s: string) => s.split('\n').map(v => v.trim()).filter(Boolean);
 export async function mountGuideEditor(context: Context) {
-    const { model, scene, host, notify } = context;
+    const { model, thumbnails, scene, host, notify } = context;
     let guide = context.guide, index = context.getIndex(), saving = false, syncing = false, armed = false;
     const response = await fetch(`/__guide/config?product=${guide.productId}`, { cache: 'no-store' });
     if (!response.ok)
@@ -66,7 +68,7 @@ export async function mountGuideEditor(context: Context) {
         input.append(option);
     } input.value = value; input.onchange = () => change(input.value as T); label.append(input); parent.append(label); return input; }
     function section(title: string) { const s = el('section'); s.className = 'editor-section'; s.append(el('h3', title)); form.append(s); return s; }
-    const groupEditor = createGroupEditor({ getGuide: () => guide, model, onChange: rerender => { touch(); if (rerender) render(); }, notify });
+    const groupEditor = createGroupEditor({ getGuide: () => guide, model, thumbnails, onChange: rerender => { touch(); if (rerender) render(); }, notify });
     function render() {
         armed = false;
         hint.hidden = true;
@@ -99,7 +101,7 @@ export async function mountGuideEditor(context: Context) {
         const bodyList = el('div');
         bodyList.className = 'editor-body-list';
         bodies.append(bodyList);
-        model.bodies.forEach((body, i) => { const owner = guide.steps.findIndex((s, j) => j !== index && s.bodyIds.includes(body.id)), label = el('label'), check = el('input'); check.type = 'checkbox'; check.checked = step.bodyIds.includes(body.id); check.disabled = owner >= 0; check.setAttribute('aria-label', `${i + 1}. ${body.name}を追加`); check.onchange = () => { step.bodyIds = check.checked ? [...step.bodyIds, body.id] : step.bodyIds.filter(id => id !== body.id); touch(); }; label.append(check, document.createTextNode(`${i + 1}. ${body.name}${owner >= 0 ? `（Step ${owner + 1}で追加）` : ''}`)); bodyList.append(label); });
+        model.bodies.forEach((body, i) => { const owner = guide.steps.findIndex((s, j) => j !== index && s.bodyIds.includes(body.id)), label = el('label'), check = el('input'); check.type = 'checkbox'; check.checked = step.bodyIds.includes(body.id); check.disabled = owner >= 0; check.setAttribute('aria-label', `${i + 1}. ${body.name}を追加`); check.onchange = () => { step.bodyIds = check.checked ? [...step.bodyIds, body.id] : step.bodyIds.filter(id => id !== body.id); touch(); }; label.append(check, bodyThumbnail(body.id, `${i + 1}. ${body.name}`, thumbnails), document.createTextNode(`${i + 1}. ${body.name}${owner >= 0 ? `（Step ${owner + 1}で追加）` : ''}`)); bodyList.append(label); });
         const methods = section('このステップの固定方法・器具');
         field(methods, '固定方法（1行に1つ）', step.methods.join('\n'), v => step.methods = lines(v), true);
         field(methods, '必要な器具・工具（1行に1つ）', step.tools.join('\n'), v => step.tools = lines(v), true);
@@ -162,7 +164,21 @@ export async function mountGuideEditor(context: Context) {
         });
         const materials = section('制作物全体の物資一覧');
         materials.append(el('p', '部材・ビス・工具などの仕様と合計数量を入力します。数量には「未設定」などの文字も使えます。'));
-        guide.materials.forEach((material, i) => { const row = el('fieldset'); row.className = 'material-editor'; row.append(el('legend', `物資 ${i + 1}`)); materials.append(row); field(row, `物資 ${i + 1}の名前`, material.name, v => material.name = v); field(row, `物資 ${i + 1}の合計数量`, material.quantity, v => material.quantity = v); field(row, `物資 ${i + 1}の単位`, material.unit, v => material.unit = v); select<IconKind>(row, `物資 ${i + 1}のアイコン`, material.icon, [['part', '部材'], ['screw', 'ビス'], ['tool', '工具'], ['other', 'その他']], v => { material.icon = v; touch(); }); field(row, `物資 ${i + 1}の補足`, material.note, v => material.note = v, true); action(`物資 ${i + 1}を削除`, () => { guide.materials.splice(i, 1); guide.steps.forEach(s => s.materials = s.materials.filter(r => r.materialId !== material.id)); touch(); render(); }, row); });
+        const duplicateNames = new Map<string, number>();
+        model.bodies.forEach(body => duplicateNames.set(body.name, (duplicateNames.get(body.name) ?? 0) + 1));
+        guide.materials.forEach((material, i) => {
+            const row = el('fieldset'); row.className = 'material-editor'; row.append(el('legend', `物資 ${i + 1}`)); materials.append(row);
+            field(row, `物資 ${i + 1}の名前`, material.name, value => material.name = value);
+            field(row, `物資 ${i + 1}の合計数量`, material.quantity, value => material.quantity = value);
+            field(row, `物資 ${i + 1}の単位`, material.unit, value => material.unit = value);
+            select<IconKind>(row, `物資 ${i + 1}のアイコン`, material.icon, [['part', '部材'], ['screw', 'ビス'], ['tool', '工具'], ['other', 'その他']], value => { material.icon = value; if (value !== 'part') delete material.bodyId; touch(); render(); });
+            if (material.icon === 'part') {
+                select<string>(row, `物資 ${i + 1}の3D部品`, material.bodyId ?? '', [['', '部品画像なし'], ...model.bodies.map((body, index): [string, string] => [body.id, duplicateNames.get(body.name)! > 1 ? `${body.name} · ${String(index + 1).padStart(2, '0')}` : body.name])], value => { if (value) material.bodyId = value; else delete material.bodyId; touch(); render(); });
+                if (material.bodyId) row.append(bodyThumbnail(material.bodyId, material.name, thumbnails));
+            }
+            field(row, `物資 ${i + 1}の補足`, material.note, value => material.note = value, true);
+            action(`物資 ${i + 1}を削除`, () => { guide.materials.splice(i, 1); guide.steps.forEach(step => step.materials = step.materials.filter(requirement => requirement.materialId !== material.id)); touch(); render(); }, row);
+        });
         action('物資を追加', () => { guide.materials.push({ id: newId(), name: '新しい物資', quantity: '未設定', unit: '点', icon: 'other', note: '' }); touch(); render(); }, materials);
         const files = section('JSONの控え・取り込み');
         action('JSONを書き出す', () => { try {
@@ -303,5 +319,5 @@ export async function mountGuideEditor(context: Context) {
         event.preventDefault(); };
     window.addEventListener('beforeunload', beforeUnload);
     render();
-    return { selectStep(next: number) { index = next; render(); }, dispose() { window.removeEventListener('beforeunload', beforeUnload); canvas.removeEventListener('pointerdown', down); canvas.removeEventListener('pointerup', up, true); canvas.removeEventListener('pointercancel', cancelPointer); panel.remove(); hint.remove(); open.remove(); } };
+    return { isPlacingMarker() { return armed; }, selectStep(next: number) { index = next; render(); }, dispose() { window.removeEventListener('beforeunload', beforeUnload); canvas.removeEventListener('pointerdown', down); canvas.removeEventListener('pointerup', up, true); canvas.removeEventListener('pointercancel', cancelPointer); panel.remove(); hint.remove(); open.remove(); } };
 }

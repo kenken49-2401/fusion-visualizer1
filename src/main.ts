@@ -7,6 +7,9 @@ import { ModelScene, type View } from './scene';
 import { mountDrawings } from './drawings';
 import { mountMeasurements } from './measurements';
 import { mountGroups } from './groups';
+import { createBodyThumbnails } from './body-thumbnails';
+import { attachBodyPicker, createBodySelection } from './body-selection';
+import { fetchModelMetadata } from './model-metadata';
 import './style.css';
 
 mountShell(document.querySelector<HTMLElement>('#app')!);
@@ -84,6 +87,16 @@ async function start(): Promise<void> {
   const appearance = new Appearance(loaded.bodies);
   appearance.apply(config.colors);
   scene.setModel(loaded);
+  const uploadInfo = document.createElement('p'); uploadInfo.id = 'model-uploaded'; uploadInfo.className = 'model-uploaded'; uploadInfo.textContent = '3MF最終アップロード：確認中';
+  document.querySelector('.model-section')!.append(uploadInfo);
+  void fetchModelMetadata(config.model, loaded.fingerprint, 'https://kenken49-2401.github.io/fusion-visualizer1/model-metadata.json').then(metadata => {
+    uploadInfo.dataset.status = metadata.status; uploadInfo.replaceChildren(document.createTextNode('3MF最終アップロード：'));
+    if (metadata.status === 'known' && metadata.uploadedAt) {
+      const time = document.createElement('time'); time.dateTime = metadata.uploadedAt;
+      time.textContent = new Intl.DateTimeFormat('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Tokyo' }).format(new Date(metadata.uploadedAt)) + '（日本時間）'; uploadInfo.append(time);
+    } else uploadInfo.append(document.createTextNode(metadata.status === 'local-change' ? '公開版と異なる3MF（日時は未確認）' : '記録なし'));
+  });
+  const selection = createBodySelection(scene.scene, loaded.bodies, () => scene.requestRender());
   const format = (n: number) => new Intl.NumberFormat('ja-JP', { maximumFractionDigits: 2 }).format(Math.abs(n) < 0.0001 ? 0 : n);
   el('model-unit').textContent = `mm${loaded.sourceUnit === 'millimeter' ? '' : '（元データから換算）'}`;
   el('model-body-count').textContent = `${loaded.bodies.length} ボディ`;
@@ -96,12 +109,32 @@ async function start(): Promise<void> {
     el('status').textContent = `${visible} / ${loaded.bodies.length} ボディ表示 · ${loaded.triangles.toLocaleString('ja-JP')} ポリゴン`;
   };
   const duplicateNames = new Map<string, number>();
+  const selectionTools = document.createElement('div'); selectionTools.className = 'body-selection-tools';
+  const selectionLabel = document.createElement('span'); selectionLabel.textContent = '画像・名前をタップして部品を強調'; selectionLabel.setAttribute('role', 'status');
+  const clearSelection = document.createElement('button'); clearSelection.type = 'button'; clearSelection.textContent = '選択を解除'; clearSelection.disabled = true;
+  selectionTools.append(selectionLabel, clearSelection); el('body-list').before(selectionTools);
+  const rows = new Map<string, HTMLElement>();
+  const selectBody = (id?: string) => {
+    selection.select(id);
+    const body = loaded.bodies.find(item => item.id === selection.selectedId);
+    for (const [bodyId, row] of rows) {
+      const selected = bodyId === selection.selectedId;
+      row.classList.toggle('is-selected', selected);
+      row.querySelector('.body-select')!.setAttribute('aria-pressed', String(selected));
+      if (selected) row.setAttribute('aria-current', 'true'); else row.removeAttribute('aria-current');
+    }
+    clearSelection.disabled = !body;
+    selectionLabel.textContent = body ? `${body.name}を強調表示${body.object.visible ? '' : '（非表示中）'}` : '画像・名前をタップして部品を強調';
+    if (body) el('viewport').dataset.selectedBody = body.id; else delete el('viewport').dataset.selectedBody;
+  };
+  clearSelection.onclick = () => selectBody();
   const groups = mountGroups(el('body-list').closest('section')!, loaded.bodies, () => {
     for (const body of loaded.bodies) {
       const row = [...el('body-list').querySelectorAll<HTMLElement>('[data-body-id]')].find(node => node.dataset.bodyId === body.id);
       row?.classList.toggle('is-hidden', !body.object.visible);
       row?.querySelector('.body-toggle')?.setAttribute('aria-pressed', String(body.object.visible));
     }
+    if (selection.selectedId && !loaded.bodies.find(body => body.id === selection.selectedId)?.object.visible) selectBody(); else selection.refresh();
     setStatus(); scene.requestRender();
   }, members => {
     const bounds = new Box3(); members.forEach(body => bounds.union(new Box3().setFromObject(body.object)));
@@ -115,20 +148,46 @@ async function start(): Promise<void> {
     const swatch = document.createElement('span'); swatch.className = 'body-swatch'; swatch.style.backgroundColor = appearance.swatch(body); swatches.set(body.id, swatch);
     const displayName = duplicateNames.get(body.name)! > 1 ? `${body.name} · ${String(index + 1).padStart(2, '0')}` : body.name;
     const name = document.createElement('span'); name.className = 'body-name'; name.textContent = displayName; name.title = `${displayName} (${body.id})`;
+    const select = document.createElement('button'); select.type = 'button'; select.className = 'body-select'; select.setAttribute('aria-label', `${displayName}を選択`); select.setAttribute('aria-pressed', 'false');
+    const thumbnail = document.createElement('span'); thumbnail.className = 'body-thumbnail'; thumbnail.dataset.bodyId = body.id; thumbnail.textContent = '準備中';
+    select.append(thumbnail, name);
     const focus = document.createElement('button'); focus.type = 'button'; focus.className = 'body-focus'; focus.textContent = '⌖'; focus.setAttribute('aria-label', `${displayName}に注目`);
     const toggle = document.createElement('button'); toggle.type = 'button'; toggle.className = 'body-toggle'; toggle.setAttribute('aria-pressed', 'true'); toggle.setAttribute('aria-label', `${displayName}を表示`);
     toggle.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
     toggle.onclick = () => {
       body.object.visible = !body.object.visible;
       row.classList.toggle('is-hidden', !body.object.visible); toggle.setAttribute('aria-pressed', String(body.object.visible));
+      if (!body.object.visible && selection.selectedId === body.id) selectBody(); else selection.refresh();
       setStatus(); groups.update(); scene.requestRender();
+    };
+    select.onclick = () => {
+      if (!body.object.visible) toggle.click();
+      selectBody(body.id);
+      el('viewport').scrollIntoView({ block: 'center', behavior: 'smooth' });
     };
     focus.onclick = () => {
       if (!body.object.visible) toggle.click();
       activeView(); scene.focus(new Box3().setFromObject(body.object));
     };
-    row.append(swatch, name, focus, toggle); el('body-list').append(row);
+    row.append(select, swatch, focus, toggle); el('body-list').append(row); rows.set(body.id, row);
   }
+  // PNG images share a single temporary context; they do not add a canvas per row.
+  let disposed = false;
+  void createBodyThumbnails(loaded.bodies).then(images => {
+    if (disposed) return;
+    for (const body of loaded.bodies) {
+      const target = rows.get(body.id)!.querySelector<HTMLElement>('.body-thumbnail')!;
+      const source = images.get(body.id);
+      if (!source) { target.textContent = '画像なし'; continue; }
+      const image = document.createElement('img'); image.src = source; image.alt = `${body.name}の単体3Dプレビュー`; image.width = 128; image.height = 128; image.draggable = false;
+      target.replaceChildren(image);
+    }
+    el('body-list').dataset.thumbnailsReady = 'true';
+  }).catch(() => {
+    if (disposed) return;
+    rows.forEach(row => { row.querySelector('.body-thumbnail')!.textContent = '画像なし'; });
+    el('body-list').dataset.thumbnailsReady = 'unavailable';
+  });
   viewButtons.forEach(button => { button.onclick = () => { const view = button.dataset.view as View; activeView(view); scene.setView(view); }; });
   scene.onCameraChange = () => activeView();
   el<HTMLButtonElement>('fit').onclick = () => scene.fitAll();
@@ -141,6 +200,7 @@ async function start(): Promise<void> {
   el<HTMLButtonElement>('open-drawings').disabled = false;
   const measurements = mountMeasurements({ scene, model: loaded, modelKey: `${entry.id}:${loaded.fingerprint}:${config.upAxis}:${config.frontAxis}`, panel: el('measurement-panel') });
   const measurementToggle = el('measurement-panel').querySelector<HTMLButtonElement>('.measurement-toggle')!;
+  const stopBodyPicker = attachBodyPicker({ element: scene.renderer.domElement, camera: scene.camera, bodies: loaded.bodies, onSelect: selectBody, isEnabled: () => measurementToggle.getAttribute('aria-pressed') !== 'true' });
   const shortcut = el<HTMLButtonElement>('measurement-shortcut');
   shortcut.disabled = false;
   shortcut.onclick = () => measurementToggle.click();
@@ -165,7 +225,7 @@ async function start(): Promise<void> {
       scene.requestRender();
     }, notify: toast });
   }
-  window.addEventListener('pagehide', event => { if (!event.persisted) { closeDrawings(); measurements.dispose(); scene.dispose(); } });
+  window.addEventListener('pagehide', event => { if (!event.persisted) { disposed = true; stopBodyPicker(); selection.dispose(); closeDrawings(); measurements.dispose(); scene.dispose(); } });
 }
 
 start().catch(error => {

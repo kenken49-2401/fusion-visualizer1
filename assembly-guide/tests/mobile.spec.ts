@@ -15,3 +15,17 @@ test('phone can choose products, advance steps and inspect annotations without p
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: 'test-results/guide-phone.png', fullPage: true });
 });
+
+test('phone can tap a body image and visibility control without changing the step', async ({ page }) => {
+    await page.goto('/?product=standing-desk-large');
+    await expect(page.locator('#viewport')).toHaveAttribute('data-ready', 'true');
+    const first = page.locator('.guide-body-row').first(), id = await first.getAttribute('data-body-id');
+    await first.locator('.guide-body-select').tap();
+    await expect(page.locator('#viewport')).toHaveAttribute('data-selected-body', id!);
+    await first.locator('.guide-body-visibility').tap();
+    await expect(page.locator('#viewport')).toHaveAttribute('data-visible-bodies', '18');
+    await expect(page.locator('#viewport')).toHaveAttribute('data-step', '1');
+    await page.getByRole('button', { name: '表示を手順に戻す', exact: true }).tap();
+    await expect(page.locator('#viewport')).toHaveAttribute('data-visible-bodies', '19');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});

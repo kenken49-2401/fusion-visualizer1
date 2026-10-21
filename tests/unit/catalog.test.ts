@@ -56,6 +56,28 @@ describe('published model catalog', () => {
       expect(new Set(guide.steps.flatMap(step => step.bodyIds))).toEqual(new Set(ids));
     }
   });
+  it('maps every shipped part material to its actual body instance in loaded order without mapping fasteners or tools', () => {
+    const catalog = parseCatalog(JSON.parse(readFileSync('assembly-guide/public/catalog.json', 'utf8')));
+    const counts = [1, 4, 31, 19, 13];
+    catalog.forEach((entry, index) => {
+      const config = parseConfig(JSON.parse(readFileSync(`assembly-guide/public/${entry.config}`, 'utf8')));
+      const bytes = readFileSync(`assembly-guide/public/${config.model}`);
+      const ids = parseModel(Uint8Array.from(bytes).buffer, config).bodies.map(body => body.id);
+      const raw = JSON.parse(readFileSync(`assembly-guide/public/guides/${entry.id}.json`, 'utf8'));
+      const guide = parseGuide(raw, ids);
+      const materials = guide.materials.filter(material => /^part-\d+$/.test(material.id));
+      expect(materials).toHaveLength(counts[index]);
+      expect(materials.map(material => material.id)).toEqual(ids.map((_, i) => `part-${i + 1}`));
+      expect(materials.map(material => material.bodyId)).toEqual(ids);
+      expect(new Set(materials.map(material => material.bodyId)).size).toBe(ids.length);
+      // Unknown source keys must not hide accidental mappings stripped by parsing.
+      expect(raw.materials.filter((material: { id: string }) => !/^part-\d+$/.test(material.id))
+        .every((material: { bodyId?: string }) => material.bodyId === undefined)).toBe(true);
+      expect(guide.materials.filter(material => !/^part-\d+$/.test(material.id))
+        .every(material => material.bodyId === undefined)).toBe(true);
+      expect(materials.every(material => material.icon === 'part')).toBe(true);
+    });
+  });
   it('rejects duplicate IDs, arbitrary config URLs and traversal', () => {
     const entry = { id: 'model', title: 'model', config: 'viewer.json' };
     expect(() => parseCatalog({ schemaVersion: 1, models: [entry, entry] })).toThrow();

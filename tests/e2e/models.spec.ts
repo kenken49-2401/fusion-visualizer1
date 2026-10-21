@@ -130,3 +130,27 @@ test('public viewers use saved groups without exposing group editing', async ({ 
   await page.getByRole('button', { name: '脚の組のグループに注目', exact: true }).click();
   await expect(page.locator('#status')).toContainText('19 / 19');
 });
+
+test('body images select a real highlight, preserve colors, toggle visibility and display the model upload timestamp', async ({ page, request }) => {
+  const record = await (await request.get('/model-metadata.json')).json();
+  await page.goto('/?model=pillar-decoration');
+  await expect(page.locator('#body-list')).toHaveAttribute('data-thumbnails-ready', 'true');
+  await expect(page.locator('.body-thumbnail img')).toHaveCount(4);
+  const first = page.locator('.body-row').first(), id = await first.getAttribute('data-body-id');
+  await expect(first.locator('img')).toHaveJSProperty('naturalWidth', 128);
+  const swatch = await first.locator('.body-swatch').getAttribute('style');
+  const before = await page.locator('#viewport canvas').screenshot();
+  await first.locator('.body-select').click();
+  await expect(page.locator('#viewport')).toHaveAttribute('data-selected-body', id!);
+  await expect(first).toHaveClass(/is-selected/);
+  expect((await page.locator('#viewport canvas').screenshot()).equals(before)).toBe(false);
+  expect(await first.locator('.body-swatch').getAttribute('style')).toBe(swatch);
+  await first.locator('.body-toggle').click();
+  await expect(page.locator('#status')).toContainText('3 / 4');
+  await expect(page.locator('#viewport')).not.toHaveAttribute('data-selected-body');
+  await first.locator('.body-select').click();
+  await expect(page.locator('#status')).toContainText('4 / 4');
+  await expect(page.locator('#model-uploaded time')).toHaveAttribute('datetime', record.models['models/pillar-decoration.3mf'].uploadedAt);
+  await page.getByRole('button', { name: '選択を解除', exact: true }).click();
+  await expect(page.locator('#viewport')).not.toHaveAttribute('data-selected-body');
+});
