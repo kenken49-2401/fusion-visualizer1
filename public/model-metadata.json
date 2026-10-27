@@ -10,6 +10,11 @@
       "sha256": "a0f125705d14596c80aef17c944c1e8ccbf6f91836fc51123bd9098451748f4e",
       "uploadedAt": "2026-10-27T02:11:06.000Z",
       "commit": "94fee6468ec4290f1ac86bc8fddda52a4e67e5b7"
+    },
+    "models/menu-sign.3mf": {
+      "sha256": "b69b7fd61f1ea616178bd98db919b6471b7dc7168822f11176bf7d05aa4ec93a",
+      "uploadedAt": "2026-10-27T14:33:20.000Z",
+      "commit": "1e9a892a5061d8722335b7c8566079f3860ee58f"
     }
   }
 }
