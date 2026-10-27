@@ -6,11 +6,11 @@ import { parseCatalog, parseConfig } from '../../src/config';
 import { parseModel } from '../../src/model-loader';
 
 describe('published model catalog', () => {
-  it('resolves all five originals with their actual body counts, triangles and dimensions', () => {
+  it('resolves the two published desks with their actual body counts, triangles and dimensions', () => {
     const catalog = parseCatalog(JSON.parse(readFileSync('public/catalog.json', 'utf8')));
-    expect(catalog.map(entry => entry.id)).toEqual(['figure-stand', 'pillar-decoration', 'signage', 'standing-desk-large', 'standing-desk-small']);
-    const counts = [1, 4, 31, 23, 14], triangles = [68, 348, 1876, 636, 444];
-    const sizes = [[1000, 1500, 40], [975, 1990, 845], [940, 2141.856384, 930], [2730.000064, 992, 910], [1820, 992, 910]];
+    expect(catalog.map(entry => entry.id)).toEqual(['standing-desk-large', 'standing-desk-small']);
+    const counts = [23, 14], triangles = [636, 444];
+    const sizes = [[2730.000064, 992, 910], [1820, 992, 910]];
     catalog.forEach((entry, index) => {
       const config = parseConfig(JSON.parse(readFileSync(`public/${entry.config}`, 'utf8')));
       const model = parseModel(Uint8Array.from(readFileSync(`public/${config.model}`)).buffer, config);
@@ -21,7 +21,7 @@ describe('published model catalog', () => {
   });
   it('publishes both attached desks byte-for-byte in the independent guide with complete draft body references', () => {
     const catalog = parseCatalog(JSON.parse(readFileSync('assembly-guide/public/catalog.json', 'utf8')));
-    expect(catalog.map(entry => entry.id)).toEqual(['figure-stand', 'pillar-decoration', 'signage', 'standing-desk-large', 'standing-desk-small']);
+    expect(catalog.map(entry => entry.id)).toEqual(['standing-desk-large', 'standing-desk-small']);
     const originals: Record<string, string> = {
       'standing-desk-large': '56b674d6e6fb53ef5c18b110f193a4e805e28deddad8d9127c269457065bb180',
       'standing-desk-small': 'a0f125705d14596c80aef17c944c1e8ccbf6f91836fc51123bd9098451748f4e',
@@ -58,7 +58,7 @@ describe('published model catalog', () => {
   });
   it('maps every shipped part material to its actual body instance in loaded order without mapping fasteners or tools', () => {
     const catalog = parseCatalog(JSON.parse(readFileSync('assembly-guide/public/catalog.json', 'utf8')));
-    const counts = [1, 4, 31, 23, 14];
+    const counts = [23, 14];
     catalog.forEach((entry, index) => {
       const config = parseConfig(JSON.parse(readFileSync(`assembly-guide/public/${entry.config}`, 'utf8')));
       const bytes = readFileSync(`assembly-guide/public/${config.model}`);
