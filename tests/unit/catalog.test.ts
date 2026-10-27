@@ -6,11 +6,11 @@ import { parseCatalog, parseConfig } from '../../src/config';
 import { parseModel } from '../../src/model-loader';
 
 describe('published model catalog', () => {
-  it('resolves the two published desks with their actual body counts, triangles and dimensions', () => {
+  it('resolves all published models with their actual body counts, triangles and dimensions', () => {
     const catalog = parseCatalog(JSON.parse(readFileSync('public/catalog.json', 'utf8')));
-    expect(catalog.map(entry => entry.id)).toEqual(['standing-desk-large', 'standing-desk-small']);
-    const counts = [23, 14], triangles = [636, 444];
-    const sizes = [[2730.000064, 992, 910], [1820, 992, 910]];
+    expect(catalog.map(entry => entry.id)).toEqual(['standing-desk-large', 'standing-desk-small', 'menu-sign']);
+    const counts = [23, 14, 9], triangles = [636, 444, 188];
+    const sizes = [[2730.000064, 992, 910], [1820, 992, 910], [1820, 2800, 480]];
     catalog.forEach((entry, index) => {
       const config = parseConfig(JSON.parse(readFileSync(`public/${entry.config}`, 'utf8')));
       const model = parseModel(Uint8Array.from(readFileSync(`public/${config.model}`)).buffer, config);
@@ -19,10 +19,11 @@ describe('published model catalog', () => {
       expect(new Set(model.bodies.map(body => body.id)).size).toBe(counts[index]);
     });
   });
-  it('publishes both attached desks byte-for-byte in the independent guide with complete draft body references', () => {
+  it('publishes attached models byte-for-byte in the independent guide with complete draft body references', () => {
     const catalog = parseCatalog(JSON.parse(readFileSync('assembly-guide/public/catalog.json', 'utf8')));
-    expect(catalog.map(entry => entry.id)).toEqual(['standing-desk-large', 'standing-desk-small']);
+    expect(catalog.map(entry => entry.id)).toEqual(['standing-desk-large', 'standing-desk-small', 'menu-sign']);
     const originals: Record<string, string> = {
+      'menu-sign': 'b69b7fd61f1ea616178bd98db919b6471b7dc7168822f11176bf7d05aa4ec93a',
       'standing-desk-large': '56b674d6e6fb53ef5c18b110f193a4e805e28deddad8d9127c269457065bb180',
       'standing-desk-small': 'a0f125705d14596c80aef17c944c1e8ccbf6f91836fc51123bd9098451748f4e',
     };
@@ -58,7 +59,7 @@ describe('published model catalog', () => {
   });
   it('maps every shipped part material to its actual body instance in loaded order without mapping fasteners or tools', () => {
     const catalog = parseCatalog(JSON.parse(readFileSync('assembly-guide/public/catalog.json', 'utf8')));
-    const counts = [23, 14];
+    const counts = [23, 14, 9];
     catalog.forEach((entry, index) => {
       const config = parseConfig(JSON.parse(readFileSync(`assembly-guide/public/${entry.config}`, 'utf8')));
       const bytes = readFileSync(`assembly-guide/public/${config.model}`);

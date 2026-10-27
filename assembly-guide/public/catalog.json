@@ -10,6 +10,11 @@
       "id": "standing-desk-small",
       "title": "立ち机 小",
       "config": "models/standing-desk-small.json"
+    },
+    {
+      "id": "menu-sign",
+      "title": "メニュー看板",
+      "config": "models/menu-sign.json"
     }
   ]
 }
