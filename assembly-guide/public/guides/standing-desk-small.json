@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "productId": "standing-desk-small",
   "title": "立ち机 小",
-  "summary": "天板支え、足4本、A・B材、天板の順に組み立てます。固定方法・工具は未設定です。",
+  "summary": "天板支え、足4本、A・B材、天板の順に組み立てます。固定方法は未設定です。",
   "status": "ready",
   "materials": [
     {
@@ -178,7 +178,9 @@
           "quantity": "1"
         }
       ],
-      "tools": [],
+      "tools": [
+        "65mmビス"
+      ],
       "methods": [],
       "markers": []
     },
@@ -230,7 +232,9 @@
           "quantity": "1"
         }
       ],
-      "tools": [],
+      "tools": [
+        "55mmビス"
+      ],
       "methods": [],
       "markers": []
     },
@@ -247,7 +251,9 @@
           "quantity": "1"
         }
       ],
-      "tools": [],
+      "tools": [
+        "25mmビス（なくなった場合は、なるべく短い釘を使用。天板を貫通しないように注意）"
+      ],
       "methods": [],
       "markers": []
     }

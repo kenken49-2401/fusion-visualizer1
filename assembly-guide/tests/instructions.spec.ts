@@ -13,6 +13,10 @@ for (const [id, counts, titles] of [
     await expect(page.locator('#viewport')).toHaveAttribute('data-step', String(i + 1));
     await expect(page.locator('#viewport')).toHaveAttribute('data-visible-bodies', String(counts[i]));
     await expect(page.locator('#scene-step-title')).toHaveText(titles[i]);
+    if (id !== 'menu-sign' && i > 0) {
+      await expect(page.locator('#tools')).toContainText(['', '65mmビス', '55mmビス', '25mmビス'][i]);
+      if (i === 3) await expect(page.locator('#tools')).toContainText('貫通しないように注意');
+    }
     if (i < titles.length - 1) await page.getByRole('button', { name: '次のステップを3Dで表示', exact: true }).click();
   }
   if (id !== 'menu-sign') {

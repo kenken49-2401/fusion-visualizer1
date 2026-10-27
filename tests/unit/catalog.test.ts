@@ -52,7 +52,8 @@ describe('published model catalog', () => {
           expect(new Set(colors.slice(0, split)).size).toBe(1); expect(new Set(colors.slice(split)).size).toBe(1);
           expect(colors[0]).not.toBe(colors[split]);
         }
-        expect(guide.steps.every(step => !step.tools.length && !step.methods.length && !step.markers.length)).toBe(true);
+        expect(guide.steps.map(step => step.tools)).toEqual([[], ['65mmビス'], ['55mmビス'], ['25mmビス（なくなった場合は、なるべく短い釘を使用。天板を貫通しないように注意）']]);
+        expect(guide.steps.every(step => !step.methods.length && !step.markers.length)).toBe(true);
         continue;
       }
       expect(guide.status).toBe('ready');
@@ -67,13 +68,14 @@ describe('published model catalog', () => {
         const colors = guide.steps[2].bodyIds.map(id => config.colors[id]);
         expect(new Set(colors.slice(0, 4)).size).toBe(1); expect(new Set(colors.slice(4)).size).toBe(1);
         expect(colors[0]).not.toBe(colors[4]);
+        expect(guide.steps.map(step => step.tools)).toEqual([[], ['65mmビス'], ['55mmビス'], ['25mmビス（なくなった場合は、なるべく短い釘を使用。天板を貫通しないように注意）']]);
       } else {
         expect(guide.steps.map(step => step.title)).toEqual(['人形立てを用意する', 'メニュー看板を上に載せる', '固定する', '立てる', 'テントに紐で固定する']);
         expect(guide.steps.map(step => step.bodyIds.length)).toEqual([8, 1, 0, 0, 0]);
         expect(guide.steps[1].bodyIds).toEqual(['build:0/object:1']);
         expect(guide.steps[4].materials).toEqual([{ materialId: 'tie-rope', quantity: '未指定' }]);
       }
-      expect(guide.steps.every(step => !step.markers.length && !step.tools.length)).toBe(true);
+      expect(guide.steps.every(step => !step.markers.length)).toBe(true);
     }
   });
   it('resolves every independent guide catalog entry against its complete model body IDs', () => {
