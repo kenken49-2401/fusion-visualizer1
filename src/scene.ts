@@ -3,7 +3,8 @@ import {
   HemisphereLight, LineBasicMaterial, LineSegments, Mesh, MeshBasicMaterial,
   PerspectiveCamera, PlaneGeometry, SRGBColorSpace, Vector3, WebGLRenderer, Scene,
 } from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import type { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CursorOrbitControls } from './cursor-orbit-controls';
 import type { LoadedModel } from './model-loader';
 
 export type View = 'iso' | 'front' | 'right' | 'top';
@@ -47,7 +48,7 @@ export class ModelScene {
     canvas.setAttribute('aria-label', '3Dモデル表示');
     canvas.setAttribute('role', 'img');
     this.viewport.append(canvas);
-    this.controls = new OrbitControls(this.camera, canvas);
+    this.controls = new CursorOrbitControls(this.camera, canvas);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.12;
     this.controls.screenSpacePanning = true;
