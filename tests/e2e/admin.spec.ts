@@ -147,10 +147,10 @@ test('groups save without changing mesh bytes, survive reload, rename, recolor a
   await page.getByRole('button', { name: 'グループを作成', exact: true }).click();
   await expect(page.locator('.public-group')).toHaveCount(1);
   await page.getByRole('button', { name: '脚の組の表示切り替え', exact: true }).click();
-  await expect(page.locator('#status')).toContainText('17 / 19');
+  await expect(page.locator('#status')).toContainText('21 / 23');
   await expect(page.locator('.body-row.is-hidden')).toHaveCount(2);
   await page.getByRole('button', { name: '脚の組のグループに注目', exact: true }).click();
-  await expect(page.locator('#status')).toContainText('19 / 19');
+  await expect(page.locator('#status')).toContainText('23 / 23');
   await page.getByRole('button', { name: '設定を保存', exact: true }).click();
   await expect(page.locator('.editor-state')).toContainText('保存済み');
   expect(readFileSync(modelPath)).toEqual(originals.get(modelPath));
@@ -177,7 +177,7 @@ test('groups save without changing mesh bytes, survive reload, rename, recolor a
   await expect(page.locator('.editor-state')).toContainText('保存済み');
   expect(JSON.parse(readFileSync(configPath, 'utf8')).groups).toEqual([]);
   expect(readFileSync(modelPath)).toEqual(coloredModel);
-  await expect(page.locator('.body-row')).toHaveCount(19);
+  await expect(page.locator('.body-row')).toHaveCount(23);
 });
 
 test('group endpoint validates membership, rejects stale writes and keeps groups for older color clients', async ({ request }) => {

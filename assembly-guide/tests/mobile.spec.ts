@@ -23,9 +23,9 @@ test('phone can tap a body image and visibility control without changing the ste
     await first.locator('.guide-body-select').tap();
     await expect(page.locator('#viewport')).toHaveAttribute('data-selected-body', id!);
     await first.locator('.guide-body-visibility').tap();
-    await expect(page.locator('#viewport')).toHaveAttribute('data-visible-bodies', '18');
+    await expect(page.locator('#viewport')).toHaveAttribute('data-visible-bodies', '22');
     await expect(page.locator('#viewport')).toHaveAttribute('data-step', '1');
     await page.getByRole('button', { name: '表示を手順に戻す', exact: true }).tap();
-    await expect(page.locator('#viewport')).toHaveAttribute('data-visible-bodies', '19');
+    await expect(page.locator('#viewport')).toHaveAttribute('data-visible-bodies', '23');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

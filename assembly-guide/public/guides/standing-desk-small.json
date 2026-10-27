@@ -8,7 +8,7 @@
     {
       "id": "part-1",
       "bodyId": "build:0/object:1",
-      "name": "1. ボディ1",
+      "name": "1. A1",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
@@ -17,7 +17,7 @@
     {
       "id": "part-2",
       "bodyId": "build:1/object:3",
-      "name": "2. ボディ10",
+      "name": "2. A2",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
@@ -26,7 +26,7 @@
     {
       "id": "part-3",
       "bodyId": "build:2/object:5",
-      "name": "3. ボディ11",
+      "name": "3. A3",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
@@ -35,7 +35,7 @@
     {
       "id": "part-4",
       "bodyId": "build:3/object:7",
-      "name": "4. ボディ12",
+      "name": "4. A4",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
@@ -44,7 +44,7 @@
     {
       "id": "part-5",
       "bodyId": "build:4/object:9",
-      "name": "5. ボディ13",
+      "name": "5. B1",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
@@ -53,7 +53,7 @@
     {
       "id": "part-6",
       "bodyId": "build:5/object:11",
-      "name": "6. ボディ2",
+      "name": "6. B2",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
@@ -62,7 +62,7 @@
     {
       "id": "part-7",
       "bodyId": "build:6/object:13",
-      "name": "7. ボディ3",
+      "name": "7. B3",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
@@ -71,7 +71,7 @@
     {
       "id": "part-8",
       "bodyId": "build:7/object:15",
-      "name": "8. ボディ4",
+      "name": "8. B4",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
@@ -80,7 +80,7 @@
     {
       "id": "part-9",
       "bodyId": "build:8/object:17",
-      "name": "9. ボディ5",
+      "name": "9. 天板",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
@@ -89,7 +89,7 @@
     {
       "id": "part-10",
       "bodyId": "build:9/object:19",
-      "name": "10. ボディ6",
+      "name": "10. 天板支え",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
@@ -98,7 +98,7 @@
     {
       "id": "part-11",
       "bodyId": "build:10/object:21",
-      "name": "11. ボディ7",
+      "name": "11. 足1",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
@@ -107,7 +107,7 @@
     {
       "id": "part-12",
       "bodyId": "build:11/object:23",
-      "name": "12. ボディ8",
+      "name": "12. 足2",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
@@ -116,7 +116,16 @@
     {
       "id": "part-13",
       "bodyId": "build:12/object:25",
-      "name": "13. ボディ9",
+      "name": "13. 足3",
+      "quantity": "1",
+      "unit": "点",
+      "icon": "part",
+      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+    },
+    {
+      "id": "part-14",
+      "bodyId": "build:13/object:27",
+      "name": "14. 足4",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
@@ -141,7 +150,8 @@
         "build:9/object:19",
         "build:10/object:21",
         "build:11/object:23",
-        "build:12/object:25"
+        "build:12/object:25",
+        "build:13/object:27"
       ],
       "materials": [
         {
@@ -194,6 +204,10 @@
         },
         {
           "materialId": "part-13",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-14",
           "quantity": "1"
         }
       ],

@@ -21,8 +21,8 @@ Fusion から書き出した 3MF を、スマートフォンや PC のブラウ�
 | [人形立て](https://kenken49-2401.github.io/fusion-visualizer1/?model=figure-stand) | 1 | 68 | 1000 × 40 × 1500 |
 | [柱装飾](https://kenken49-2401.github.io/fusion-visualizer1/?model=pillar-decoration) | 4 | 348 | 975 × 845 × 1990 |
 | [サイネージ](https://kenken49-2401.github.io/fusion-visualizer1/?model=signage) | 31 | 1876 | 940 × 930 × 2141.86 |
-| [立ち机 大](https://kenken49-2401.github.io/fusion-visualizer1/?model=standing-desk-large) | 19 | 308 | 2300 × 880 × 980 |
-| [立ち机 小](https://kenken49-2401.github.io/fusion-visualizer1/?model=standing-desk-small) | 13 | 428 | 1820 × 910 × 992 |
+| [立ち机 大](https://kenken49-2401.github.io/fusion-visualizer1/?model=standing-desk-large) | 23 | 636 | 2730 × 910 × 992 |
+| [立ち机 小](https://kenken49-2401.github.io/fusion-visualizer1/?model=standing-desk-small) | 14 | 444 | 1820 × 910 × 992 |
 
 同じ名前のボディは画面上で番号を付けて区別します。寸法は配置・向きを反映したメッシュの外接寸法です。人形立ての元データは X / Y / Z が 40 / 1000 / 1500 mm、上方向 Z・正面方向 X、ボディ `ボディ2` の ID は `build:0/object:1` です。柱装飾とサイネージは上方向 Z・正面方向 Y です。
 

@@ -38,7 +38,7 @@ test('products, cumulative step bodies, red additions, supplies, and fixed-posit
 test('both attached standing desks load as complete draft models and keep their links', async ({ page }) => {
     await page.goto('/?product=standing-desk-large');
     await expect(page.locator('#viewport')).toHaveAttribute('data-ready', 'true');
-    for (const [id, title, count] of [['standing-desk-large', '立ち机 大', '19'], ['standing-desk-small', '立ち机 小', '13']]) {
+    for (const [id, title, count] of [['standing-desk-large', '立ち机 大', '23'], ['standing-desk-small', '立ち机 小', '14']]) {
         await page.locator(`#products [data-product-id="${id}"]`).click();
         await expect(page.locator('#viewport')).toHaveAttribute('data-product-id', id);
         await expect(page.locator('#guide-title')).toHaveText(title);

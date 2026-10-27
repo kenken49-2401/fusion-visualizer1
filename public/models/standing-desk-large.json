@@ -3,7 +3,7 @@
   "model": "models/standing-desk-large.3mf",
   "title": "立ち机 大",
   "description": "Fusionで作成した立ち机 大の3Dモデルです。各ボディの表示、寸法付き図面、距離測定で形状を確認できます。",
-  "updatedAt": "2026-10-19",
+  "updatedAt": "2026-10-27",
   "upAxis": "Z",
   "frontAxis": "Y",
   "colors": {}

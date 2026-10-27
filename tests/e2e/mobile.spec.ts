@@ -83,9 +83,9 @@ test('narrow phone fits the complete annotated drawing and returns from the part
 test('phone can display both new standing desks without horizontal page overflow', async ({ page }) => {
   await page.goto('/?model=standing-desk-large');
   await expect(page.locator('#viewport')).toHaveAttribute('data-model-id', 'standing-desk-large');
-  await expect(page.locator('#model-body-count')).toHaveText('19 ボディ');
+  await expect(page.locator('#model-body-count')).toHaveText('23 ボディ');
   await page.getByLabel('閲覧するモデル', { exact: true }).selectOption('standing-desk-small');
   await expect(page.locator('#viewport')).toHaveAttribute('data-model-id', 'standing-desk-small');
-  await expect(page.locator('#model-body-count')).toHaveText('13 ボディ');
+  await expect(page.locator('#model-body-count')).toHaveText('14 ボディ');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

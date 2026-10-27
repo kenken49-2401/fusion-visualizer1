@@ -26,8 +26,8 @@ test('attached standing desks load real bodies and dimensions through the model 
   await page.goto('/');
   await expect(page.locator('#viewport')).toHaveAttribute('data-ready', 'true');
   for (const [id, title, count, triangles, size] of [
-    ['standing-desk-large', '立ち机 大', '19', '308', '2,300 × 880 × 980 mm'],
-    ['standing-desk-small', '立ち机 小', '13', '428', '1,820 × 910 × 992 mm'],
+    ['standing-desk-large', '立ち机 大', '23', '636', '2,730 × 910 × 992 mm'],
+    ['standing-desk-small', '立ち机 小', '14', '444', '1,820 × 910 × 992 mm'],
   ]) {
     await page.getByLabel('閲覧するモデル', { exact: true }).selectOption(id);
     await expect(page.locator('#viewport')).toHaveAttribute('data-model-id', id);
@@ -126,9 +126,9 @@ test('public viewers use saved groups without exposing group editing', async ({ 
   await expect(page.locator('#viewport')).toHaveAttribute('data-ready', 'true');
   await expect(page.getByRole('button', { name: 'グループを作成', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: '脚の組の表示切り替え', exact: true }).click();
-  await expect(page.locator('#status')).toContainText('17 / 19');
+  await expect(page.locator('#status')).toContainText('21 / 23');
   await page.getByRole('button', { name: '脚の組のグループに注目', exact: true }).click();
-  await expect(page.locator('#status')).toContainText('19 / 19');
+  await expect(page.locator('#status')).toContainText('23 / 23');
 });
 
 test('body images select a real highlight, preserve colors, toggle visibility and display the model upload timestamp', async ({ page, request }) => {
