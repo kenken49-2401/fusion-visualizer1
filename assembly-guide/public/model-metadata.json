@@ -17,14 +17,14 @@
       "commit": "c19501a3e4a2c97a8d62103b95eddcff7f2b4287"
     },
     "models/standing-desk-large.3mf": {
-      "sha256": "819f6f80b2dd821e64b91604044ff49411d5e01696a4ecd466867fa90c9a1639",
-      "uploadedAt": "2026-10-19T13:28:40.000Z",
-      "commit": "fccc0ecb5c203c05ee4447be62fc0151e544cefc"
+      "sha256": "56b674d6e6fb53ef5c18b110f193a4e805e28deddad8d9127c269457065bb180",
+      "uploadedAt": "2026-10-27T02:11:06.000Z",
+      "commit": "94fee6468ec4290f1ac86bc8fddda52a4e67e5b7"
     },
     "models/standing-desk-small.3mf": {
-      "sha256": "a854f399ed372d4ec4420ac102cfd0fc5b9e120250ebf9fd5239c73f466918a1",
-      "uploadedAt": "2026-10-19T13:28:40.000Z",
-      "commit": "fccc0ecb5c203c05ee4447be62fc0151e544cefc"
+      "sha256": "a0f125705d14596c80aef17c944c1e8ccbf6f91836fc51123bd9098451748f4e",
+      "uploadedAt": "2026-10-27T02:11:06.000Z",
+      "commit": "94fee6468ec4290f1ac86bc8fddda52a4e67e5b7"
     }
   }
 }
