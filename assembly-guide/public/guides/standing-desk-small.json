@@ -2,134 +2,166 @@
   "schemaVersion": 1,
   "productId": "standing-desk-small",
   "title": "立ち机 小",
-  "summary": "天板支え、足4本、A・B材、天板の順に組み立てます。固定方法は未設定です。",
+  "summary": "簡単だからこんなの見なくても分かる2",
   "status": "ready",
   "materials": [
     {
       "id": "part-1",
-      "bodyId": "build:0/object:1",
       "name": "A1",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:0/object:1"
     },
     {
       "id": "part-2",
-      "bodyId": "build:1/object:3",
       "name": "A2",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:1/object:3"
     },
     {
       "id": "part-3",
-      "bodyId": "build:2/object:5",
       "name": "A3",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:2/object:5"
     },
     {
       "id": "part-4",
-      "bodyId": "build:3/object:7",
       "name": "A4",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:3/object:7"
     },
     {
       "id": "part-5",
-      "bodyId": "build:4/object:9",
       "name": "B1",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:4/object:9"
     },
     {
       "id": "part-6",
-      "bodyId": "build:5/object:11",
       "name": "B2",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:5/object:11"
     },
     {
       "id": "part-7",
-      "bodyId": "build:6/object:13",
       "name": "B3",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:6/object:13"
     },
     {
       "id": "part-8",
-      "bodyId": "build:7/object:15",
       "name": "B4",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:7/object:15"
     },
     {
       "id": "part-9",
-      "bodyId": "build:8/object:17",
       "name": "天板",
       "quantity": "1",
       "unit": "枚",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:8/object:17"
     },
     {
       "id": "part-10",
-      "bodyId": "build:9/object:19",
       "name": "天板支え",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:9/object:19"
     },
     {
       "id": "part-11",
-      "bodyId": "build:10/object:21",
       "name": "足1",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:10/object:21"
     },
     {
       "id": "part-12",
-      "bodyId": "build:11/object:23",
       "name": "足2",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:11/object:23"
     },
     {
       "id": "part-13",
-      "bodyId": "build:12/object:25",
       "name": "足3",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:12/object:25"
     },
     {
       "id": "part-14",
-      "bodyId": "build:13/object:27",
       "name": "足4",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:13/object:27"
+    }
+  ],
+  "groups": [
+    {
+      "id": "id-ce0a63a1-1daa-449d-98c7-b3ab19e89c0b",
+      "name": "A",
+      "bodyIds": [
+        "build:0/object:1",
+        "build:1/object:3",
+        "build:2/object:5",
+        "build:3/object:7"
+      ]
+    },
+    {
+      "id": "id-446d7ef9-a16f-4580-b2fa-7ee16ce42201",
+      "name": "B",
+      "bodyIds": [
+        "build:4/object:9",
+        "build:5/object:11",
+        "build:6/object:13",
+        "build:7/object:15"
+      ]
+    },
+    {
+      "id": "id-c80cfb29-fe23-4213-871b-91498b7a429c",
+      "name": "足",
+      "bodyIds": [
+        "build:10/object:21",
+        "build:11/object:23",
+        "build:12/object:25",
+        "build:13/object:27"
+      ]
     }
   ],
   "steps": [
@@ -153,7 +185,7 @@
     {
       "id": "step-2",
       "title": "足4本を取り付ける",
-      "description": "天板支えに足1〜4を取り付けます。足4本は青で表示しています。",
+      "description": "天板支えに足を取り付けます。足4本は青で表示しています。",
       "bodyIds": [
         "build:10/object:21",
         "build:11/object:23",
@@ -179,15 +211,18 @@
         }
       ],
       "tools": [
-        "65mmビス"
+        "65mmビスx4"
       ],
-      "methods": [],
+      "methods": [
+        "65mmビスで固定する(長い方が良い)",
+        "足1本につきビス1本でOK"
+      ],
       "markers": []
     },
     {
       "id": "step-3",
-      "title": "A1〜A4・B1〜B4を取り付ける",
-      "description": "A1〜A4とB1〜B4を取り付けます。緑：A1〜A4（4本）。紫：B1〜B4（4本）。",
+      "title": "斜め材(A, B)を取り付ける",
+      "description": "斜め材のA, Bを取り付けます。\n緑：A（4本）\n紫：B（4本）",
       "bodyIds": [
         "build:0/object:1",
         "build:1/object:3",
@@ -232,16 +267,14 @@
           "quantity": "1"
         }
       ],
-      "tools": [
-        "55mmビス"
-      ],
+      "tools": [],
       "methods": [],
       "markers": []
     },
     {
       "id": "step-4",
       "title": "天板を取り付ける",
-      "description": "天板を取り付けます。",
+      "description": "35mmビスを使いたいですが、なければ斜め材のところとかに長めのビスを入れよう。貫通しないように。",
       "bodyIds": [
         "build:8/object:17"
       ],
@@ -251,11 +284,76 @@
           "quantity": "1"
         }
       ],
-      "tools": [
-        "25mmビス（なくなった場合は、なるべく短い釘を使用。天板を貫通しないように注意）"
+      "tools": [],
+      "methods": [
+        "35mmビスで4か所固定する"
       ],
-      "methods": [],
-      "markers": []
+      "markers": [
+        {
+          "id": "id-c4fdcd15-5662-4aec-b4eb-269f275d841d",
+          "type": "screw",
+          "label": "固定位置",
+          "position": [
+            590,
+            992,
+            420
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "lengthMM": 35
+        },
+        {
+          "id": "id-513fd678-23f8-43ff-ad33-b95f1c9b60a6",
+          "type": "screw",
+          "label": "固定位置",
+          "position": [
+            590,
+            992,
+            -420
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "lengthMM": 35
+        },
+        {
+          "id": "id-0e634541-af86-4abf-82d2-0bc636bbcc2f",
+          "type": "screw",
+          "label": "固定位置",
+          "position": [
+            -590,
+            992,
+            -420
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "lengthMM": 35
+        },
+        {
+          "id": "id-795e7ae4-bc3f-4643-9588-1a20bf118558",
+          "type": "screw",
+          "label": "固定位置",
+          "position": [
+            -590,
+            992,
+            420
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "lengthMM": 35
+        }
+      ]
     }
   ]
 }

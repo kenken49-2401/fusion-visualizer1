@@ -6,6 +6,7 @@ export class FixingView {
     private labels: {
         element: HTMLSpanElement;
         position: Vector3;
+        leader: SVGLineElement;
     }[] = [];
     private overlay = document.createElement('div');
     private observer: ResizeObserver;
@@ -19,7 +20,11 @@ export class FixingView {
     }
     set(markers: FixingMarker[]) {
         this.clear();
-        for (const marker of markers) {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;overflow:hidden'; this.overlay.append(svg);
+        const lengths = [...new Set(markers.filter(marker => marker.type === 'screw').map(marker => marker.lengthMM))];
+        if (lengths.length) { const caption = document.createElement('span'); caption.className = 'fixing-caption'; caption.textContent = `ビス ${lengths.join(' / ')}mm`; this.overlay.append(caption); }
+        for (const [index, marker] of markers.entries()) {
             const position = new Vector3(...marker.position).multiplyScalar(.001), direction = new Vector3(...marker.direction).normalize();
             const size = Math.max(this.span * .07, .06), radius = Math.max(this.span * .0018, .002);
             const material = new MeshBasicMaterial({ color: '#e33732', depthTest: false, depthWrite: false });
@@ -48,10 +53,14 @@ export class FixingView {
             }
             const element = document.createElement('span');
             element.className = 'fixing-label';
-            element.textContent = marker.label || '固定位置';
+            element.textContent = String(index + 1);
+            element.dataset.lengthMm = String(marker.lengthMM);
+            element.setAttribute('aria-label', `${marker.label || '固定位置'} ${index + 1}：${marker.lengthMM}mm`);
+            element.title = `${marker.label || '固定位置'} ${index + 1}：${marker.lengthMM}mm`;
+            const leader = document.createElementNS('http://www.w3.org/2000/svg', 'line'); leader.setAttribute('stroke', '#e33732'); leader.setAttribute('stroke-width', '1'); svg.append(leader);
             element.dataset.markerId = marker.id;
             this.overlay.append(element);
-            this.labels.push({ element, position });
+            this.labels.push({ element, position, leader });
         }
         this.group.traverse(object => { object.renderOrder = 20; });
         this.scene.requestRender();
@@ -59,12 +68,24 @@ export class FixingView {
     }
     readonly update = () => {
         const { width, height } = this.viewport.getBoundingClientRect();
-        for (const { element, position } of this.labels) {
+        const placed: { x: number; y: number; width: number; height: number }[] = [];
+        for (const { element, position, leader } of this.labels) {
             const point = position.clone().project(this.scene.camera);
-            element.hidden = point.z < -1 || point.z > 1 || Math.abs(point.x) > 1.15 || Math.abs(point.y) > 1.15;
-            const half = Math.min(90, width / 2);
-            element.style.left = `${Math.max(half, Math.min(width - half, (point.x + 1) * width / 2))}px`;
-            element.style.top = `${Math.max(20, Math.min(height - 25, (1 - point.y) * height / 2 - 22))}px`;
+            element.hidden = point.z < -1 || point.z > 1 || Math.abs(point.x) > 1.05 || Math.abs(point.y) > 1.05;
+            leader.style.display = element.hidden ? 'none' : '';
+            if (element.hidden) continue;
+            const anchorX = (point.x + 1) * width / 2, anchorY = (1 - point.y) * height / 2;
+            const w = element.offsetWidth, h = element.offsetHeight;
+            const x = Math.max(w / 2 + 3, Math.min(width - w / 2 - 3, anchorX));
+            let y = Math.max(h + 3, Math.min(height - 3, anchorY - 14));
+            for (let attempt = 0; attempt < this.labels.length; attempt++) {
+                const overlap = placed.find(other => Math.abs(x - other.x) < (w + other.width) / 2 + 3 && y > other.y - other.height - 3 && y - h < other.y + 3);
+                if (!overlap) break;
+                y = Math.max(h + 3, overlap.y - overlap.height - 5);
+            }
+            element.style.left = `${x}px`; element.style.top = `${y}px`;
+            placed.push({ x, y, width: w, height: h });
+            for (const [key, value] of Object.entries({ x1: anchorX, y1: anchorY, x2: x, y2: y })) leader.setAttribute(key, String(value));
         }
     };
     focus(marker: FixingMarker) { const p = new Vector3(...marker.position).multiplyScalar(.001), size = Math.max(this.span * .12, .1); this.scene.focus(new Box3().setFromCenterAndSize(p, new Vector3(size, size, size))); this.update(); }

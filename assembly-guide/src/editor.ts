@@ -3,7 +3,7 @@ import type { LoadedModel } from './model-loader';
 import type { ModelScene } from './scene';
 import { createGroupEditor, renderGroupShortcuts } from './editor-groups';
 import { bodyThumbnail } from './body-icons';
-import { newId, parseGuide, type Guide, type GuideStep, type IconKind, type MarkerKind } from './schema';
+import { newId, parseGuide, type Guide, type GuideStep, type MarkerKind } from './schema';
 interface Context {
     guide: Guide;
     model: LoadedModel;
@@ -101,34 +101,9 @@ export async function mountGuideEditor(context: Context) {
         const bodyList = el('div');
         bodyList.className = 'editor-body-list';
         bodies.append(bodyList);
-        model.bodies.forEach((body, i) => { const owner = guide.steps.findIndex((s, j) => j !== index && s.bodyIds.includes(body.id)), label = el('label'), check = el('input'); check.type = 'checkbox'; check.checked = step.bodyIds.includes(body.id); check.disabled = owner >= 0; check.setAttribute('aria-label', `${i + 1}. ${body.name}を追加`); check.onchange = () => { step.bodyIds = check.checked ? [...step.bodyIds, body.id] : step.bodyIds.filter(id => id !== body.id); touch(); }; label.append(check, bodyThumbnail(body.id, `${i + 1}. ${body.name}`, thumbnails), document.createTextNode(`${i + 1}. ${body.name}${owner >= 0 ? `（Step ${owner + 1}で追加）` : ''}`)); bodyList.append(label); });
-        const methods = section('このステップの固定方法・器具');
-        field(methods, '固定方法（1行に1つ）', step.methods.join('\n'), v => step.methods = lines(v), true);
-        field(methods, '必要な器具・工具（1行に1つ）', step.tools.join('\n'), v => step.tools = lines(v), true);
-        const required = section('このステップで使う物資');
-        for (const material of guide.materials) {
-            const row = el('div');
-            row.className = 'requirement-editor';
-            const label = el('label'), check = el('input');
-            check.type = 'checkbox';
-            const req = step.materials.find(r => r.materialId === material.id);
-            check.checked = !!req;
-            label.append(check, document.createTextNode(material.name));
-            row.append(label);
-            const quantity = el('input');
-            quantity.type = 'text';
-            quantity.value = req?.quantity ?? '';
-            quantity.placeholder = '使用数';
-            quantity.disabled = !req;
-            quantity.setAttribute('aria-label', `${material.name}の使用数`);
-            quantity.oninput = () => { const current = step.materials.find(r => r.materialId === material.id); if (current) {
-                current.quantity = quantity.value;
-                touch();
-            } };
-            check.onchange = () => { step.materials = check.checked ? [...step.materials, { materialId: material.id, quantity: quantity.value || material.quantity }] : step.materials.filter(r => r.materialId !== material.id); touch(); render(); };
-            row.append(quantity);
-            required.append(row);
-        }
+        model.bodies.forEach((body, i) => { const owner = guide.steps.findIndex((s, j) => j !== index && s.bodyIds.includes(body.id)), label = el('label'), check = el('input'); check.type = 'checkbox'; check.checked = step.bodyIds.includes(body.id); check.disabled = owner >= 0; check.setAttribute('aria-label', `${i + 1}. ${body.name}を追加`); check.onchange = () => { step.bodyIds = check.checked ? [...step.bodyIds, body.id] : step.bodyIds.filter(id => id !== body.id); touch(); }; label.append(check, bodyThumbnail(body.id, body.name, thumbnails), document.createTextNode(body.name)); bodyList.append(label); });
+        const tools = section('必要な器具・工具');
+        field(tools, '必要な器具・工具（1行に1つ）', step.tools.join('\n'), v => step.tools = lines(v), true);
         const markers = section('3D上の固定位置');
         markers.append(el('p', '「3Dで固定位置を追加」を押してモデル表面をタップします。ビスの挿入方向は表面から内側へ向けて初期設定します。位置・方向・長さは後から調整できます。'));
         const type = select<MarkerKind>(markers, '追加する固定記号', 'screw', [['screw', 'ビスと矢印'], ['arrow', '矢印'], ['point', '位置の印']], () => { });
@@ -162,24 +137,6 @@ export async function mountGuideEditor(context: Context) {
             length.step = 'any';
             action(`固定位置 ${i + 1}を削除`, () => { step.markers.splice(i, 1); touch(); render(); }, row);
         });
-        const materials = section('制作物全体の物資一覧');
-        materials.append(el('p', '部材・ビス・工具などの仕様と合計数量を入力します。数量には「未設定」などの文字も使えます。'));
-        const duplicateNames = new Map<string, number>();
-        model.bodies.forEach(body => duplicateNames.set(body.name, (duplicateNames.get(body.name) ?? 0) + 1));
-        guide.materials.forEach((material, i) => {
-            const row = el('fieldset'); row.className = 'material-editor'; row.append(el('legend', `物資 ${i + 1}`)); materials.append(row);
-            field(row, `物資 ${i + 1}の名前`, material.name, value => material.name = value);
-            field(row, `物資 ${i + 1}の合計数量`, material.quantity, value => material.quantity = value);
-            field(row, `物資 ${i + 1}の単位`, material.unit, value => material.unit = value);
-            select<IconKind>(row, `物資 ${i + 1}のアイコン`, material.icon, [['part', '部材'], ['screw', 'ビス'], ['tool', '工具'], ['other', 'その他']], value => { material.icon = value; if (value !== 'part') delete material.bodyId; touch(); render(); });
-            if (material.icon === 'part') {
-                select<string>(row, `物資 ${i + 1}の3D部品`, material.bodyId ?? '', [['', '部品画像なし'], ...model.bodies.map((body, index): [string, string] => [body.id, duplicateNames.get(body.name)! > 1 ? `${body.name} · ${String(index + 1).padStart(2, '0')}` : body.name])], value => { if (value) material.bodyId = value; else delete material.bodyId; touch(); render(); });
-                if (material.bodyId) row.append(bodyThumbnail(material.bodyId, material.name, thumbnails));
-            }
-            field(row, `物資 ${i + 1}の補足`, material.note, value => material.note = value, true);
-            action(`物資 ${i + 1}を削除`, () => { guide.materials.splice(i, 1); guide.steps.forEach(step => step.materials = step.materials.filter(requirement => requirement.materialId !== material.id)); touch(); render(); }, row);
-        });
-        action('物資を追加', () => { guide.materials.push({ id: newId(), name: '新しい物資', quantity: '未設定', unit: '点', icon: 'other', note: '' }); touch(); render(); }, materials);
         const files = section('JSONの控え・取り込み');
         action('JSONを書き出す', () => { try {
             const value = parseGuide(guide, model.bodies.map(b => b.id)), url = URL.createObjectURL(new Blob([JSON.stringify(value, null, 2) + '\n'], { type: 'application/json' })), a = el('a');
@@ -253,7 +210,7 @@ export async function mountGuideEditor(context: Context) {
                 number,
                 number,
                 number
-            ], lengthMM: 40 });
+            ], lengthMM: 35 });
         armed = false;
         touch();
         render();

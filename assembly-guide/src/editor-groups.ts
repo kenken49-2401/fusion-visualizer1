@@ -17,7 +17,7 @@ function members(host: HTMLElement, model: LoadedModel, names: Map<string, strin
         check.type = 'checkbox'; check.value = body.id; check.checked = selected.has(body.id); check.disabled = owner !== undefined;
         check.setAttribute('aria-label', labelFor(names.get(body.id)!));
         check.onchange = () => change(body.id, check.checked);
-        label.append(check, bodyThumbnail(body.id, names.get(body.id)!, thumbnails), document.createTextNode(`${names.get(body.id)}${owner ? `（${owner}に所属）` : ''}`)); list.append(label);
+        label.append(check, bodyThumbnail(body.id, names.get(body.id)!, thumbnails), document.createTextNode(names.get(body.id)!)); list.append(label);
     }
 }
 
@@ -36,6 +36,7 @@ export function createGroupEditor({ getGuide, model, thumbnails, onChange, notif
     const newMembers = new Set<string>();
     return { render(host: HTMLElement) {
         const guide = getGuide();
+        for (const group of guide.groups) for (const id of group.bodyIds) names.set(id, group.name);
         host.classList.add('group-editor-section');
         host.append(node('p', '部品に名前付きのまとまりを作り、ステップへまとめて追加できます。グループを変更・削除しても、既に割り当てたステップは変わりません。1つの部品が属するグループは1つです。'));
         for (const [index, group] of guide.groups.entries()) {

@@ -268,6 +268,7 @@ export function mountDrawings({ model, title, trigger }: { model: LoadedModel; t
   });
   const open = () => {
     if (!parts) parts = model.bodies.map(measurePart);
+    parts.forEach((p, i) => { p.name = model.bodies[i].name; part.options[i + 1].textContent = `${i + 1}. ${p.name}`; });
     dialog.showModal(); render(); observer?.observe(diagram);
   };
   const onResize = () => {

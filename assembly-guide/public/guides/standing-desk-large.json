@@ -2,215 +2,255 @@
   "schemaVersion": 1,
   "productId": "standing-desk-large",
   "title": "立ち机 大",
-  "summary": "天板支え、足6本、A・B材、天板の順に組み立てます。固定方法は未設定です。",
+  "summary": "立ち食い用の机。簡単だからこんなの見なくても分かると思う",
   "status": "ready",
   "materials": [
     {
       "id": "part-1",
-      "bodyId": "build:0/object:1",
       "name": "A1",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:0/object:1"
     },
     {
       "id": "part-2",
-      "bodyId": "build:1/object:3",
       "name": "A2",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:1/object:3"
     },
     {
       "id": "part-3",
-      "bodyId": "build:2/object:5",
       "name": "A3",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:2/object:5"
     },
     {
       "id": "part-4",
-      "bodyId": "build:3/object:7",
       "name": "A4",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:3/object:7"
     },
     {
       "id": "part-5",
-      "bodyId": "build:4/object:9",
       "name": "A5",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:4/object:9"
     },
     {
       "id": "part-6",
-      "bodyId": "build:5/object:11",
       "name": "A6",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:5/object:11"
     },
     {
       "id": "part-7",
-      "bodyId": "build:6/object:13",
       "name": "B1",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:6/object:13"
     },
     {
       "id": "part-8",
-      "bodyId": "build:7/object:15",
       "name": "B2",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:7/object:15"
     },
     {
       "id": "part-9",
-      "bodyId": "build:8/object:17",
       "name": "B3",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:8/object:17"
     },
     {
       "id": "part-10",
-      "bodyId": "build:9/object:19",
       "name": "B4",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:9/object:19"
     },
     {
       "id": "part-11",
-      "bodyId": "build:10/object:21",
       "name": "B5",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:10/object:21"
     },
     {
       "id": "part-12",
-      "bodyId": "build:11/object:23",
       "name": "B6",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:11/object:23"
     },
     {
       "id": "part-13",
-      "bodyId": "build:12/object:25",
       "name": "B7",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:12/object:25"
     },
     {
       "id": "part-14",
-      "bodyId": "build:13/object:27",
       "name": "B8",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:13/object:27"
     },
     {
       "id": "part-15",
-      "bodyId": "build:14/object:29",
       "name": "P3_1",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:14/object:29"
     },
     {
       "id": "part-16",
-      "bodyId": "build:15/object:31",
       "name": "P3_2",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:15/object:31"
     },
     {
       "id": "part-17",
-      "bodyId": "build:16/object:33",
       "name": "天板大",
       "quantity": "1",
       "unit": "枚",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:16/object:33"
     },
     {
       "id": "part-18",
-      "bodyId": "build:17/object:35",
       "name": "天板小",
       "quantity": "1",
       "unit": "枚",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:17/object:35"
     },
     {
       "id": "part-19",
-      "bodyId": "build:18/object:37",
       "name": "天板支え",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:18/object:37"
     },
     {
       "id": "part-20",
-      "bodyId": "build:19/object:39",
       "name": "足1",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:19/object:39"
     },
     {
       "id": "part-21",
-      "bodyId": "build:20/object:41",
       "name": "足2",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:20/object:41"
     },
     {
       "id": "part-22",
-      "bodyId": "build:21/object:43",
       "name": "足3",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:21/object:43"
     },
     {
       "id": "part-23",
-      "bodyId": "build:22/object:45",
       "name": "足4",
       "quantity": "1",
       "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する部品です。"
+      "note": "3MFのボディに対応する部品です。",
+      "bodyId": "build:22/object:45"
+    }
+  ],
+  "groups": [
+    {
+      "id": "id-497aedad-96c2-48d8-b2d2-41aa39d1a7f7",
+      "name": "A",
+      "bodyIds": [
+        "build:0/object:1",
+        "build:1/object:3",
+        "build:2/object:5",
+        "build:3/object:7",
+        "build:4/object:9",
+        "build:5/object:11"
+      ]
+    },
+    {
+      "id": "id-47462f83-c661-4c4d-bb80-35b3e4fed9b0",
+      "name": "B",
+      "bodyIds": [
+        "build:6/object:13",
+        "build:7/object:15",
+        "build:8/object:17",
+        "build:9/object:19",
+        "build:10/object:21",
+        "build:11/object:23",
+        "build:12/object:25",
+        "build:13/object:27"
+      ]
+    },
+    {
+      "id": "id-94cc65f7-2c71-4da0-8141-867be049853d",
+      "name": "足",
+      "bodyIds": [
+        "build:14/object:29",
+        "build:15/object:31",
+        "build:19/object:39",
+        "build:20/object:41",
+        "build:21/object:43",
+        "build:22/object:45"
+      ]
     }
   ],
   "steps": [
@@ -234,7 +274,7 @@
     {
       "id": "step-2",
       "title": "足6本を取り付ける",
-      "description": "天板支えに足6本を取り付けます。青：足1〜4（4本）。オレンジ：P3_1・P3_2（2本）。",
+      "description": "天板支えに足6本を取り付けます。\n青：P1, P2（4本）\nオレンジ：P3\n青は40mmの面(広い面)が立ち机の短辺に沿うように、\nオレンジは40mmの面が立ち机の長辺に沿うように",
       "bodyIds": [
         "build:19/object:39",
         "build:20/object:41",
@@ -269,16 +309,14 @@
           "quantity": "1"
         }
       ],
-      "tools": [
-        "65mmビス"
-      ],
+      "tools": [],
       "methods": [],
       "markers": []
     },
     {
       "id": "step-3",
-      "title": "A1〜A6・B1〜B8を取り付ける",
-      "description": "A1〜A6とB1〜B8を取り付けます。緑：A1〜A6（6本）。紫：B1〜B8（8本）。",
+      "title": "斜め材(A, B)を取り付ける",
+      "description": "斜め材のAとBを取り付けます。\n緑：A\n紫：B",
       "bodyIds": [
         "build:0/object:1",
         "build:1/object:3",
@@ -353,16 +391,14 @@
           "quantity": "1"
         }
       ],
-      "tools": [
-        "55mmビス"
-      ],
+      "tools": [],
       "methods": [],
       "markers": []
     },
     {
       "id": "step-4",
-      "title": "天板 大・小を取り付ける",
-      "description": "天板大と天板小を取り付けます。",
+      "title": "天板を取り付ける",
+      "description": "天板を付ける\n35mmビスを使いたいですが、なければ斜め材のところとかに長めのビスを入れよう。貫通しないように。",
       "bodyIds": [
         "build:16/object:33",
         "build:17/object:35"
@@ -377,11 +413,138 @@
           "quantity": "1"
         }
       ],
-      "tools": [
-        "25mmビス（なくなった場合は、なるべく短い釘を使用。天板を貫通しないように注意）"
-      ],
+      "tools": [],
       "methods": [],
-      "markers": []
+      "markers": [
+        {
+          "id": "id-140efb88-7f68-499b-a1d4-c5a3107298de",
+          "type": "screw",
+          "label": "固定位置",
+          "position": [
+            -395,
+            992,
+            420
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "lengthMM": 35
+        },
+        {
+          "id": "id-bb0fff30-a353-497d-be68-b09dd6f50e2f",
+          "type": "screw",
+          "label": "固定位置",
+          "position": [
+            -395,
+            992,
+            -420
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "lengthMM": 35
+        },
+        {
+          "id": "id-775cd82c-d06a-4f93-8076-974f98789a91",
+          "type": "screw",
+          "label": "固定位置",
+          "position": [
+            1030,
+            992,
+            -420
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "lengthMM": 35
+        },
+        {
+          "id": "id-056bc0c5-ad28-443a-b0b1-6633fbf871c2",
+          "type": "screw",
+          "label": "固定位置",
+          "position": [
+            1030,
+            992,
+            420
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "lengthMM": 35
+        },
+        {
+          "id": "id-948440aa-0081-4a29-a93a-5f8c5e7d681b",
+          "type": "screw",
+          "label": "固定位置",
+          "position": [
+            -520,
+            992,
+            420
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "lengthMM": 35
+        },
+        {
+          "id": "id-755141c6-bb0f-4e4b-916b-ef9ab1867d68",
+          "type": "screw",
+          "label": "固定位置",
+          "position": [
+            -520,
+            992,
+            -420
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "lengthMM": 35
+        },
+        {
+          "id": "id-703a1899-1021-4a39-9a55-1ed9e5649fb9",
+          "type": "screw",
+          "label": "固定位置",
+          "position": [
+            -985,
+            992,
+            420
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "lengthMM": 35
+        },
+        {
+          "id": "id-143d94b7-3e96-4ffe-9f38-60e0e2b85e01",
+          "type": "screw",
+          "label": "固定位置",
+          "position": [
+            -985,
+            992,
+            -420
+          ],
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "lengthMM": 35
+        }
+      ]
     }
   ]
 }
