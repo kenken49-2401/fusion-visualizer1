@@ -35,3 +35,8 @@ export class Appearance {
     return `#${color.getHexString(SRGBColorSpace)}`;
   }
 }
+
+/** Explicit instructional colors remain visible in both current and previous steps. */
+export function guideBodyColor(colors: Record<string, string>, bodyId: string, current: boolean, complete: boolean): string {
+  return colors[bodyId] || (!complete && current ? '#df3b35' : '#8a9c88');
+}

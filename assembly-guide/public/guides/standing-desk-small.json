@@ -2,141 +2,190 @@
   "schemaVersion": 1,
   "productId": "standing-desk-small",
   "title": "立ち机 小",
-  "summary": "モデル表示確認用の下書きです。全ボディを1つの確認ステップにまとめています。制作順序・接合方法・固定位置・工具・部材仕様は未確認です。実際の制作内容を確認してから編集してください。",
-  "status": "draft",
+  "summary": "天板支え、足4本、A・B材、天板の順に組み立てます。固定方法・工具は未設定です。",
+  "status": "ready",
   "materials": [
     {
       "id": "part-1",
       "bodyId": "build:0/object:1",
-      "name": "1. A1",
+      "name": "A1",
       "quantity": "1",
-      "unit": "点",
+      "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-2",
       "bodyId": "build:1/object:3",
-      "name": "2. A2",
+      "name": "A2",
       "quantity": "1",
-      "unit": "点",
+      "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-3",
       "bodyId": "build:2/object:5",
-      "name": "3. A3",
+      "name": "A3",
       "quantity": "1",
-      "unit": "点",
+      "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-4",
       "bodyId": "build:3/object:7",
-      "name": "4. A4",
+      "name": "A4",
       "quantity": "1",
-      "unit": "点",
+      "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-5",
       "bodyId": "build:4/object:9",
-      "name": "5. B1",
+      "name": "B1",
       "quantity": "1",
-      "unit": "点",
+      "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-6",
       "bodyId": "build:5/object:11",
-      "name": "6. B2",
+      "name": "B2",
       "quantity": "1",
-      "unit": "点",
+      "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-7",
       "bodyId": "build:6/object:13",
-      "name": "7. B3",
+      "name": "B3",
       "quantity": "1",
-      "unit": "点",
+      "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-8",
       "bodyId": "build:7/object:15",
-      "name": "8. B4",
+      "name": "B4",
       "quantity": "1",
-      "unit": "点",
+      "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-9",
       "bodyId": "build:8/object:17",
-      "name": "9. 天板",
+      "name": "天板",
       "quantity": "1",
-      "unit": "点",
+      "unit": "枚",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-10",
       "bodyId": "build:9/object:19",
-      "name": "10. 天板支え",
+      "name": "天板支え",
       "quantity": "1",
-      "unit": "点",
+      "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-11",
       "bodyId": "build:10/object:21",
-      "name": "11. 足1",
+      "name": "足1",
       "quantity": "1",
-      "unit": "点",
+      "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-12",
       "bodyId": "build:11/object:23",
-      "name": "12. 足2",
+      "name": "足2",
       "quantity": "1",
-      "unit": "点",
+      "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-13",
       "bodyId": "build:12/object:25",
-      "name": "13. 足3",
+      "name": "足3",
       "quantity": "1",
-      "unit": "点",
+      "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-14",
       "bodyId": "build:13/object:27",
-      "name": "14. 足4",
+      "name": "足4",
       "quantity": "1",
-      "unit": "点",
+      "unit": "本",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     }
   ],
   "steps": [
     {
       "id": "step-1",
-      "title": "モデル全体を確認する（下書き）",
-      "description": "モデルに含まれる全ボディを表示しています。この表示は組立順序や作業方法を示すものではありません。実際の制作手順・部材仕様・固定方法を確認し、編集者が手順を設定してください。",
+      "title": "天板支えを用意する",
+      "description": "天板支えを用意します。",
+      "bodyIds": [
+        "build:9/object:19"
+      ],
+      "materials": [
+        {
+          "materialId": "part-10",
+          "quantity": "1"
+        }
+      ],
+      "tools": [],
+      "methods": [],
+      "markers": []
+    },
+    {
+      "id": "step-2",
+      "title": "足4本を取り付ける",
+      "description": "天板支えに足1〜4を取り付けます。足4本は青で表示しています。",
+      "bodyIds": [
+        "build:10/object:21",
+        "build:11/object:23",
+        "build:12/object:25",
+        "build:13/object:27"
+      ],
+      "materials": [
+        {
+          "materialId": "part-11",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-12",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-13",
+          "quantity": "1"
+        },
+        {
+          "materialId": "part-14",
+          "quantity": "1"
+        }
+      ],
+      "tools": [],
+      "methods": [],
+      "markers": []
+    },
+    {
+      "id": "step-3",
+      "title": "A1〜A4・B1〜B4を取り付ける",
+      "description": "A1〜A4とB1〜B4を取り付けます。緑：A1〜A4（4本）。紫：B1〜B4（4本）。",
       "bodyIds": [
         "build:0/object:1",
         "build:1/object:3",
@@ -145,13 +194,7 @@
         "build:4/object:9",
         "build:5/object:11",
         "build:6/object:13",
-        "build:7/object:15",
-        "build:8/object:17",
-        "build:9/object:19",
-        "build:10/object:21",
-        "build:11/object:23",
-        "build:12/object:25",
-        "build:13/object:27"
+        "build:7/object:15"
       ],
       "materials": [
         {
@@ -185,29 +228,22 @@
         {
           "materialId": "part-8",
           "quantity": "1"
-        },
+        }
+      ],
+      "tools": [],
+      "methods": [],
+      "markers": []
+    },
+    {
+      "id": "step-4",
+      "title": "天板を取り付ける",
+      "description": "天板を取り付けます。",
+      "bodyIds": [
+        "build:8/object:17"
+      ],
+      "materials": [
         {
           "materialId": "part-9",
-          "quantity": "1"
-        },
-        {
-          "materialId": "part-10",
-          "quantity": "1"
-        },
-        {
-          "materialId": "part-11",
-          "quantity": "1"
-        },
-        {
-          "materialId": "part-12",
-          "quantity": "1"
-        },
-        {
-          "materialId": "part-13",
-          "quantity": "1"
-        },
-        {
-          "materialId": "part-14",
           "quantity": "1"
         }
       ],

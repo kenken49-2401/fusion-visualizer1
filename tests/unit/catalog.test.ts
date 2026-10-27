@@ -19,7 +19,7 @@ describe('published model catalog', () => {
       expect(new Set(model.bodies.map(body => body.id)).size).toBe(counts[index]);
     });
   });
-  it('publishes attached models byte-for-byte in the independent guide with complete draft body references', () => {
+  it('publishes attached models byte-for-byte in the independent guide with complete body references', () => {
     const catalog = parseCatalog(JSON.parse(readFileSync('assembly-guide/public/catalog.json', 'utf8')));
     expect(catalog.map(entry => entry.id)).toEqual(['standing-desk-large', 'standing-desk-small', 'menu-sign']);
     const originals: Record<string, string> = {
@@ -38,11 +38,42 @@ describe('published model catalog', () => {
       const model = parseModel(Uint8Array.from(bytes).buffer, config);
       const ids = model.bodies.map(body => body.id);
       const guide = parseGuide(JSON.parse(readFileSync(`assembly-guide/public/guides/${id}.json`, 'utf8')), ids);
-      expect(guide.productId).toBe(id); expect(guide.title).toBe(config.title); expect(guide.status).toBe('draft');
-      expect(guide.steps).toHaveLength(1);
-      expect(guide.steps[0].bodyIds).toEqual(ids);
-      expect(guide.steps[0].tools).toEqual([]); expect(guide.steps[0].methods).toEqual([]); expect(guide.steps[0].markers).toEqual([]);
-      expect(guide.summary).toContain('未確認');
+      expect(guide.productId).toBe(id); expect(guide.title).toBe(config.title);
+      if (id === 'standing-desk-large') {
+        expect(guide.status).toBe('ready'); expect(guide.steps.map(step => step.bodyIds.length)).toEqual([1, 6, 14, 2]);
+        expect(new Set(guide.steps.flatMap(step => step.bodyIds))).toEqual(new Set(ids));
+        const names = new Map(model.bodies.map(body => [body.id, body.name]));
+        expect(guide.steps.map(step => step.bodyIds.map(id => names.get(id)))).toEqual([
+          ['天板支え'], ['足1', '足2', '足3', '足4', 'P3_1', 'P3_2'],
+          ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'], ['天板大', '天板小'],
+        ]);
+        for (const [index, split] of [[1, 4], [2, 6]]) {
+          const colors = guide.steps[index].bodyIds.map(id => config.colors[id]);
+          expect(new Set(colors.slice(0, split)).size).toBe(1); expect(new Set(colors.slice(split)).size).toBe(1);
+          expect(colors[0]).not.toBe(colors[split]);
+        }
+        expect(guide.steps.every(step => !step.tools.length && !step.methods.length && !step.markers.length)).toBe(true);
+        continue;
+      }
+      expect(guide.status).toBe('ready');
+      expect(new Set(guide.steps.flatMap(step => step.bodyIds))).toEqual(new Set(ids));
+      if (id === 'standing-desk-small') {
+        expect(guide.steps.map(step => step.bodyIds.length)).toEqual([1, 4, 8, 1]);
+        const names = new Map(model.bodies.map(body => [body.id, body.name]));
+        expect(guide.steps.map(step => step.bodyIds.map(id => names.get(id)))).toEqual([
+          ['天板支え'], ['足1', '足2', '足3', '足4'],
+          ['A1', 'A2', 'A3', 'A4', 'B1', 'B2', 'B3', 'B4'], ['天板'],
+        ]);
+        const colors = guide.steps[2].bodyIds.map(id => config.colors[id]);
+        expect(new Set(colors.slice(0, 4)).size).toBe(1); expect(new Set(colors.slice(4)).size).toBe(1);
+        expect(colors[0]).not.toBe(colors[4]);
+      } else {
+        expect(guide.steps.map(step => step.title)).toEqual(['人形立てを用意する', 'メニュー看板を上に載せる', '固定する', '立てる', 'テントに紐で固定する']);
+        expect(guide.steps.map(step => step.bodyIds.length)).toEqual([8, 1, 0, 0, 0]);
+        expect(guide.steps[1].bodyIds).toEqual(['build:0/object:1']);
+        expect(guide.steps[4].materials).toEqual([{ materialId: 'tie-rope', quantity: '未指定' }]);
+      }
+      expect(guide.steps.every(step => !step.markers.length && !step.tools.length)).toBe(true);
     }
   });
   it('resolves every independent guide catalog entry against its complete model body IDs', () => {

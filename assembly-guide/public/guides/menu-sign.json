@@ -2,98 +2,105 @@
   "schemaVersion": 1,
   "productId": "menu-sign",
   "title": "メニュー看板",
-  "summary": "モデル表示確認用の下書きです。全ボディを1つの確認ステップにまとめています。制作順序・接合方法・固定位置・工具・部材仕様は未確認です。実際の制作内容を確認してから編集してください。",
-  "status": "draft",
+  "summary": "人形立てにメニュー看板を載せて固定し、立ててからテントに紐で固定します。3Dは完成時の向きで表示します。",
+  "status": "ready",
   "materials": [
     {
       "id": "part-1",
       "bodyId": "build:0/object:1",
-      "name": "1. ボディ1",
+      "name": "メニュー看板",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-2",
       "bodyId": "build:1/object:3",
-      "name": "2. ボディ1",
+      "name": "人形立て 部品1",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-3",
       "bodyId": "build:2/object:5",
-      "name": "3. ボディ1",
+      "name": "人形立て 部品2",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-4",
       "bodyId": "build:3/object:7",
-      "name": "4. ボディ1",
+      "name": "人形立て 部品3",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-5",
       "bodyId": "build:4/object:9",
-      "name": "5. ボディ1",
+      "name": "人形立て 部品4",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-6",
       "bodyId": "build:5/object:11",
-      "name": "6. ボディ1",
+      "name": "人形立て 部品5",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-7",
       "bodyId": "build:6/object:13",
-      "name": "7. ボディ1",
+      "name": "人形立て 部品6",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-8",
       "bodyId": "build:7/object:15",
-      "name": "8. ボディ1",
+      "name": "人形立て 部品7",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
     },
     {
       "id": "part-9",
       "bodyId": "build:8/object:17",
-      "name": "9. ボディ1",
+      "name": "人形立て 部品8",
       "quantity": "1",
       "unit": "点",
       "icon": "part",
-      "note": "3MFのボディに対応する表示上の項目です。実際の部材名・数量は未確認です。"
+      "note": "3MFのボディに対応する部品です。"
+    },
+    {
+      "id": "tie-rope",
+      "name": "紐",
+      "quantity": "未指定",
+      "unit": "",
+      "icon": "other",
+      "note": "テントへの固定に使用します。長さ・本数は未指定です。"
     }
   ],
   "steps": [
     {
       "id": "step-1",
-      "title": "モデル全体を確認する（下書き）",
-      "description": "モデルに含まれる全ボディを表示しています。この表示は組立順序や作業方法を示すものではありません。実際の制作手順・部材仕様・固定方法を確認し、編集者が手順を設定してください。",
+      "title": "人形立てを用意する",
+      "description": "人形立てを用意します。",
       "bodyIds": [
-        "build:0/object:1",
         "build:1/object:3",
         "build:2/object:5",
         "build:3/object:7",
@@ -104,10 +111,6 @@
         "build:8/object:17"
       ],
       "materials": [
-        {
-          "materialId": "part-1",
-          "quantity": "1"
-        },
         {
           "materialId": "part-2",
           "quantity": "1"
@@ -143,6 +146,60 @@
       ],
       "tools": [],
       "methods": [],
+      "markers": []
+    },
+    {
+      "id": "step-2",
+      "title": "メニュー看板を上に載せる",
+      "description": "人形立ての上にメニュー看板を載せます。",
+      "bodyIds": [
+        "build:0/object:1"
+      ],
+      "materials": [
+        {
+          "materialId": "part-1",
+          "quantity": "1"
+        }
+      ],
+      "tools": [],
+      "methods": [],
+      "markers": []
+    },
+    {
+      "id": "step-3",
+      "title": "固定する",
+      "description": "人形立てとメニュー看板を固定します。",
+      "bodyIds": [],
+      "materials": [],
+      "tools": [],
+      "methods": [],
+      "markers": []
+    },
+    {
+      "id": "step-4",
+      "title": "立てる",
+      "description": "組み立てたメニュー看板を立てます。",
+      "bodyIds": [],
+      "materials": [],
+      "tools": [],
+      "methods": [],
+      "markers": []
+    },
+    {
+      "id": "step-5",
+      "title": "テントに紐で固定する",
+      "description": "メニュー看板をテントに紐で固定します。",
+      "bodyIds": [],
+      "materials": [
+        {
+          "materialId": "tie-rope",
+          "quantity": "未指定"
+        }
+      ],
+      "tools": [],
+      "methods": [
+        "紐でテントに固定する"
+      ],
       "markers": []
     }
   ]

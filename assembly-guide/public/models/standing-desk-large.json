@@ -6,5 +6,29 @@
   "updatedAt": "2026-10-27",
   "upAxis": "Z",
   "frontAxis": "Y",
-  "colors": {}
+  "colors": {
+    "build:0/object:1": "#2f9070",
+    "build:1/object:3": "#2f9070",
+    "build:2/object:5": "#2f9070",
+    "build:3/object:7": "#2f9070",
+    "build:4/object:9": "#2f9070",
+    "build:5/object:11": "#2f9070",
+    "build:6/object:13": "#865bb8",
+    "build:7/object:15": "#865bb8",
+    "build:8/object:17": "#865bb8",
+    "build:9/object:19": "#865bb8",
+    "build:10/object:21": "#865bb8",
+    "build:11/object:23": "#865bb8",
+    "build:12/object:25": "#865bb8",
+    "build:13/object:27": "#865bb8",
+    "build:14/object:29": "#e69a32",
+    "build:15/object:31": "#e69a32",
+    "build:16/object:33": "#c8b889",
+    "build:17/object:35": "#c8b889",
+    "build:18/object:37": "#8a9c88",
+    "build:19/object:39": "#3976c6",
+    "build:20/object:41": "#3976c6",
+    "build:21/object:43": "#3976c6",
+    "build:22/object:45": "#3976c6"
+  }
 }
